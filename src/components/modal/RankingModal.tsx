@@ -1,10 +1,13 @@
-﻿import { ChartBarIcon } from "@heroicons/react/24/outline";
+﻿import {ChartBarIcon} from "@heroicons/react/24/outline";
 import {Box} from "@chakra-ui/react";
+import {Tooltip} from "@/components/ui/tooltip";
 
 export default function RankingModal() {
     return (
-        <Box h={6} w={6} cursor="pointer">
-            <ChartBarIcon/>
-        </Box>
+        <Tooltip showArrow openDelay={500} content="Stats & Ranking">
+            <Box h={6} w={6} mx="1">
+                <ChartBarIcon className="cursor-pointer animated"/>
+            </Box>
+        </Tooltip>
     )
 }

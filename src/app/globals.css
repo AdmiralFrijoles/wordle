@@ -1,4 +1,6 @@
 :root {
+  --animation-speed: 1000ms;
+  --animation-speed-fast: 250ms;
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -14,4 +16,26 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+nav svg {
+  stroke-width: 1.75;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.cursor-pointer.animated {
+  transition: all var(--animation-speed-fast);
+}
+
+.cursor-pointer.animated:hover {
+  transform: scale(1.2);
+}
+
+.prevent-select {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
 }

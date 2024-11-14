@@ -1,10 +1,13 @@
-﻿import { Cog6ToothIcon } from "@heroicons/react/24/outline";
+﻿import {Cog6ToothIcon} from "@heroicons/react/24/outline";
 import {Box} from "@chakra-ui/react";
+import {Tooltip} from "@/components/ui/tooltip";
 
 export default function SettingsModal() {
     return (
-        <Box h={6} w={6} cursor="pointer">
-            <Cog6ToothIcon/>
-        </Box>
+        <Tooltip showArrow openDelay={500} content="Settings">
+            <Box h={6} w={6} mx="1">
+                <Cog6ToothIcon className="cursor-pointer animated"/>
+            </Box>
+        </Tooltip>
     )
 }
