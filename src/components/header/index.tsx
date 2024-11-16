@@ -9,7 +9,7 @@ export default function Header() {
     return (
         <Box as="nav" w="100%" borderBottom="1px" borderStyle="solid" borderColor="colorPalette.500" mb={6} p={2} px={4}>
             <HStack align="center" justify="space-between" w="100%">
-                <Flex align="left" justify="left" grow="1" shrink="1" basis="0">
+                <Flex align="left" justify="left" grow="1" shrink="1" basis="0" spaceX="2">
                     <GuideModal/>
                     <ArchiveModal/>
                 </Flex>
@@ -18,7 +18,7 @@ export default function Header() {
                         Dojo Wordle
                     </Text>
                 </Flex>
-                <Flex align="right" justify="right" grow="1" shrink="1" basis="0">
+                <Flex align="right" justify="right" grow="1" shrink="1" basis="0" spaceX="2">
                     <RankingModal/>
                     <CurrentUser/>
                     <SettingsModal/>

@@ -5,7 +5,7 @@ import {Tooltip} from "@/components/ui/tooltip";
 export default function RankingModal() {
     return (
         <Tooltip showArrow openDelay={500} content="Stats & Ranking">
-            <Box h={6} w={6} mx="1">
+            <Box h={6} w={6}>
                 <ChartBarIcon className="cursor-pointer animated"/>
             </Box>
         </Tooltip>
