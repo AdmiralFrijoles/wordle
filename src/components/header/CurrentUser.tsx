@@ -1,13 +1,10 @@
-﻿import {Tooltip} from "@/components/ui/tooltip";
-import {Box} from "@chakra-ui/react";
-import {UserCircleIcon} from "@heroicons/react/24/outline";
+﻿import {UserCircleIcon} from "@heroicons/react/24/outline";
+import HeaderIcon from "@/components/header/HeaderIcon";
 
 export default function CurrentUser() {
     return (
-        <Tooltip showArrow openDelay={500} content="Sign In">
-            <Box h={6} w={6}>
-                <UserCircleIcon className="cursor-pointer animated"/>
-            </Box>
-        </Tooltip>
+        <HeaderIcon tooltipContent="Sign In">
+            <UserCircleIcon className="dark:stroke-white"/>
+        </HeaderIcon>
     )
 }

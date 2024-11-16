@@ -1,76 +1,55 @@
-﻿import { Box, Center, Text } from "@chakra-ui/react";
+﻿import classnames from 'classnames'
 import {CharStatus} from "@/types";
+import {useSettings} from "@/context";
+import {REVEAL_TIME_MS, WORD_LENGTH} from "@/constants";
+import React, {ReactNode} from "react";
 
 type Props = {
+    children?: ReactNode;
     value: string;
-    onLetterClick?: (letter: string) => void;
-    status: CharStatus;
-    type: "keyboard" | "cell";
+    onClick?: (letter: string) => void;
+    status?: CharStatus;
+    width?:  number;
+    isRevealing?: boolean;
 };
 
-export default function Key({ value, status, onLetterClick, type }: Props) {
-    function handleOnLetterClick() {
-        if (onLetterClick) onLetterClick(value);
+export default function Key({ children, value, status, onClick, width = 40, isRevealing }: Props) {
+    const settings = useSettings();
+    const keyDelayMs = REVEAL_TIME_MS * WORD_LENGTH;
+    const classes = classnames(
+        'prevent-select xxshort:h-8 xxshort:w-8 xxshort:text-xxs xshort:w-10 xshort:h-10 flex short:h-12 h-14 items-center justify-center rounded mx-0.5 text-xs font-bold cursor-pointer select-none dark:text-white',
+        {
+            'transition ease-in-out': isRevealing,
+            'bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 active:bg-slate-400': !status || status === "Guessing",
+            'bg-slate-400 dark:bg-slate-800 text-white': status === 'Absent',
+            'bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white':
+                status === 'Correct' && settings.isHighContrast,
+            'bg-cyan-500 hover:bg-cyan-600 active:bg-cyan-700 text-white':
+                status === 'Present' && settings.isHighContrast,
+            'bg-green-500 hover:bg-green-600 active:bg-green-700 text-white':
+                status === 'Correct' && !settings.isHighContrast,
+            'bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700 text-white':
+                status === 'Present' && !settings.isHighContrast,
+        }
+    )
+
+    const styles = {
+        transitionDelay: isRevealing ? `${keyDelayMs}ms` : 'unset',
+        width: `${width}px`,
+    }
+
+    function handleOnLetterClick(event: React.MouseEvent<HTMLButtonElement>) {
+        if (onClick) onClick(value);
+        event.currentTarget.blur();
     }
 
     return (
-        <Box
-            className="cursor-pointer"
-            bg={
-                status === "Correct"
-                    ? "green"
-                    : status === "Present"
-                        ? "orange"
-                        : status === "Absent"
-                            ? "gray.700"
-                            : "transparent"
-            }
-            borderStyle="solid"
-            borderWidth="2px"
-            borderColor={
-                status === "Correct"
-                    ? "green"
-                    : status === "Present"
-                        ? "orange"
-                        : status === "Absent"
-                            ? "transparent"
-                            : "white"
-            }
-            minW={
-                type === "keyboard"
-                    ? {
-                        base: 6,
-                        sm: 10,
-                        md: 12
-                    }
-                    : 14
-            }
-            h={
-                type === "keyboard"
-                    ? {
-                        base: 8,
-                        md: 10,
-                        lg: "var(--chakra-font-sizes-6xl)"
-                    }
-                    : 14
-            }
-            rounded="sm"
-            transition="all"
-            transitionDuration="500ms"
-            onClick={handleOnLetterClick}
+        <button style={styles}
+                aria-label={`${value}${status ? ' ' + status : ''}`}
+                className={classes}
+                onClick={handleOnLetterClick}
         >
-            <Center h="full">
-                <Text
-                    fontWeight={"bold"}
-                    fontSize={{
-                        base: "xs",
-                        lg: "xl",
-                    }}
-                    className="prevent-select"
-                >
-                    {value}
-                </Text>
-            </Center>
-        </Box>
+            {children || value}
+        </button>
     );
 }

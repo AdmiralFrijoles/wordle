@@ -1,12 +1,9 @@
 ﻿"use client";
 
-import {VStack, HStack} from "@chakra-ui/react";
 import {useEffect, useState} from "react";
 import {GameStates, Row} from "@/types";
 import Keyboard from "@/components/game/keyboard";
-import Key from "@/components/game/key";
-import {lineHeights} from "@chakra-ui/react/dist/types/theme/tokens/line-heights";
-
+import isValidWord from "../../lib/dictionary";
 
 export default function GamePanel() {
     const [rows, setRows] = useState<Row[]>([]);
@@ -14,6 +11,10 @@ export default function GamePanel() {
     const [text, setText] = useState("");
     const [solution, setSolution] = useState("");
     const [gameState, setGameState] = useState<keyof typeof GameStates>("Playing");
+
+    function setRowIndex(index: number) {
+        setCurrentRowIndex(Math.min(Math.max(index, 0), rows.length - 1));
+    }
 
     function handleReset(){
         const temp: Row[] = [];
@@ -52,9 +53,39 @@ export default function GamePanel() {
         setText(text + letter);
     }
 
+    function getStatuses() {
+        const currentRow = rows[currentRowIndex];
+        for (let i = 0; i < currentRow.length; i++) {
+            if (solution[i] === text[i].toLocaleUpperCase())
+                currentRow[i].status = "Correct";
+            else if (solution.includes(text[i].toLocaleUpperCase()))
+                currentRow[i].status = "Present";
+            else
+                currentRow[i].status = "Absent";
+        }
+        setRows([...rows]);
+    }
+
     function handleSubmit() {
+        if (text.length !== 5) {
+            // TODO: show toast with error
+            return;
+        }
+        if (!isValidWord(text)) {
+            // TODO: show toast with error
+            return;
+        }
+        getStatuses();
+        if (text === solution.toUpperCase()) {
+            setGameState("Win");
+            return;
+        }
+        if (currentRowIndex === rows.length - 1) {
+            setGameState("Lose");
+            return;
+        }
         setText("");
-        setCurrentRowIndex((prev) => prev + 1);
+        setRowIndex(currentRowIndex + 1);
     }
 
     function deleteChar() {
@@ -79,28 +110,22 @@ export default function GamePanel() {
     }, [text]);
 
     return (
-        <VStack justify="center" h="full" pb="8">
-            <VStack pb="6">
+        <div className="mx-auto flex w-full grow flex-col px-1 pb-8 pt-2 sm:px-6 md:max-w-7xl lg:px-8 short:pb-2 short:pt-2">
+            <div className="flex grow flex-col justify-center pb-6 short:pb-2">
                 {rows.map((play, index) => (
-                    <HStack key={index}>
+                    <div key={index} className="mb-1 flex justify-center">
                         {play.map((guess, idx) => (
-                            <Key
-                                key={idx}
-                                value={guess.value}
-                                status={guess.status}
-                                onLetterClick={(letter: string) => handleLetterClick(letter)}
-                                type="cell"
-                            />
+                            <p key={idx}>{guess.value}</p>
                         ))}
-                    </HStack>
+                    </div>
                 ))}
-            </VStack>
+            </div>
             <Keyboard
                 onLetterClick={handleLetterClick}
                 onSubmit={handleSubmit}
                 rows={rows.slice(0, currentRowIndex)}
                 onDelete={deleteChar}
             />
-        </VStack>
+        </div>
     )
 }

@@ -9,28 +9,32 @@ type Props = {
 type ContextProps = {
     isHardMode: boolean;
     setIsHardMode: (value: boolean) => void;
+    isHighContrast: boolean;
+    setIsHighContrast: (value: boolean) => void;
 };
 
 const SettingsContext = createContext<ContextProps>({
     isHardMode: false,
     setIsHardMode: () => {},
+    isHighContrast: false,
+    setIsHighContrast: () => {}
 });
 
 export function SettingsProvider({ children }: Props) {
     const [isHardMode, setIsHardMode] = useState(false);
-
-    const setHardMode = (value: boolean) => {
-        setIsHardMode(value);
-    }
+    const [isHighContrast, setIsHighContrast] = useState(false);
 
     return (
-        <SettingsContext.Provider value={{ isHardMode, setIsHardMode: setHardMode }}>
+        <SettingsContext.Provider value={{
+            isHardMode, setIsHardMode,
+            isHighContrast, setIsHighContrast
+        }}>
             {children}
         </SettingsContext.Provider>
     );
 }
 
-export function useSettings () {
+export function useSettings() {
     const data = useContext(SettingsContext);
     if (!data) {
         throw new Error("Settings must be provided");

@@ -1,113 +1,30 @@
 ﻿import {CharStatus, Row} from "@/types";
-import {Button, Center, HStack, Text, VStack} from "@chakra-ui/react";
 import {useEffect, useMemo} from "react";
-import {BackspaceIcon} from "@heroicons/react/24/outline";
 import Key from "@/components/game/key";
 
 const keyboardLayout = [
     ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
     ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
-    ["ENTER", "Z", "X", "C", "V", "B", "N", "M", "DELETE"]
+    ["Z", "X", "C", "V", "B", "N", "M",]
 ];
-
-type KeyboardKeyProps = {
-    value: string;
-    onLetterClick: (letter: string) => void;
-    onSubmit: () => void;
-    onDelete: () => void;
-    status: CharStatus;
-}
-
-function KeyboardKey({
-                         value,
-                         onLetterClick,
-                         onSubmit,
-                         onDelete,
-                         status
-}: KeyboardKeyProps) {
-    if (value === "ENTER")
-        return (
-            <Button border="2px"
-                    variant="plain"
-                    type="button"
-                    className="cursor-pointer"
-                    bg="transparent"
-                    borderStyle="solid"
-                    borderWidth="2px"
-                    borderColor="white"
-                    h={{
-                        base: 8,
-                        md: 10,
-                        lg: "var(--chakra-font-sizes-6xl)"
-                    }}
-                    rounded="sm"
-                    onClick={onSubmit}
-            >
-                <Center h="full">
-                    <Text
-                        fontWeight={"bold"}
-                        fontSize={{
-                            base: "xs",
-                            lg: "xl",
-                        }}
-                        className="prevent-select"
-                    >
-                        ENTER
-                    </Text>
-                </Center>
-            </Button>
-        )
-    else if (value === "DELETE") {
-        return (
-            <Button onClick={onDelete}
-                    border="2px"
-                    variant="plain"
-                    type="button"
-                    className="cursor-pointer"
-                    bg="transparent"
-                    borderStyle="solid"
-                    borderWidth="2px"
-                    borderColor="white"
-                    w={{
-                        base: 8,
-                        sm: 10,
-                        md: 12
-                    }}
-                    h={{
-                        base: 8,
-                        md: 10,
-                        lg: "var(--chakra-font-sizes-6xl)"
-                    }}
-                    rounded="sm"
-            >
-                <Center h="full">
-                    <BackspaceIcon strokeWidth="3"/>
-                </Center>
-            </Button>
-        )
-    }
-    else
-        return (<Key value={value}
-                     onLetterClick={onLetterClick}
-                     status={status}
-                     type="keyboard"/>);
-}
 
 type Props = {
     onLetterClick: (letter: string) => void;
     onSubmit: () => void;
     onDelete: () => void;
     rows: Row[];
+    isRevealing?: boolean;
 };
 
 export default function Keyboard({
                                      onLetterClick,
                                      onSubmit,
                                      onDelete,
-                                     rows
+                                     rows,
+                                     isRevealing
 }: Props) {
     const cells = useMemo(() => rows.flat(), [rows]);
-
+    const keyboardRowCount = keyboardLayout.length;
     const checkStatus = (key: string) => {
         for (let i = 0; i < cells.length; i++) {
             if (cells[i].value === key && cells[i].status === "Absent")
@@ -135,20 +52,28 @@ export default function Keyboard({
     })
 
     return (
-        <VStack>
+        <div>
             {keyboardLayout.map((row, rowIndex) => (
-                <HStack key={rowIndex} align="center" justify="center">
-                    {row.map(key => (
-                        <KeyboardKey key={key}
-                                     value={key}
-                                     onLetterClick={onLetterClick}
-                                     onSubmit={onSubmit}
-                                     onDelete={onDelete}
-                                     status={checkStatus(key)}/>
-                    ))}
-                </HStack>
+            <div key={rowIndex}
+                 className={rowIndex < keyboardRowCount - 1 ? "mb-1 flex justify-center" : "flex justify-center"}>
+                {(rowIndex === keyboardRowCount - 1) &&
+                <Key width={65.4} value="ENTER" onClick={onSubmit}>
+                    ENTER
+                </Key>}
+                {row.map(key => (
+                    <Key key={key}
+                         value={key}
+                         onClick={onLetterClick}
+                         status={checkStatus(key)}
+                         isRevealing={isRevealing}/>
+                ))}
+                {(rowIndex === keyboardRowCount - 1) &&
+                <Key width={65.4} value="DELETE" onClick={onDelete}>
+                    DELETE
+                </Key>}
+            </div>
             ))}
-        </VStack>
+        </div>
     );
 }
 

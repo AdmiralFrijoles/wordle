@@ -1,13 +1,10 @@
 ﻿import {CalendarDaysIcon} from "@heroicons/react/24/outline";
-import {Box} from "@chakra-ui/react";
-import {Tooltip} from "@/components/ui/tooltip";
+import HeaderIcon from "@/components/header/HeaderIcon";
 
 export default function ArchiveModal() {
     return (
-        <Tooltip showArrow openDelay={500} content="Play a previous day's game">
-            <Box h={6} w={6}>
-                <CalendarDaysIcon className="cursor-pointer animated"/>
-            </Box>
-        </Tooltip>
+        <HeaderIcon tooltipContent="Previous Games">
+            <CalendarDaysIcon className="dark:stroke-white"/>
+        </HeaderIcon>
     )
 }

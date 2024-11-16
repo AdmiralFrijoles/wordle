@@ -1,10 +1,8 @@
 import "./globals.css";
-import {Provider} from "@/components/ui/provider"
-import {SettingsProvider} from "@/context";
 import React from "react";
 import type {Metadata} from 'next'
-import {Box, VStack} from "@chakra-ui/react";
 import Header from "@/components/header";
+import {Providers} from "@/providers";
 
 export const metadata: Metadata = {
     title: "Dojo Wordle",
@@ -29,18 +27,17 @@ export default function RootLayout({children}: Readonly<{
     children: React.ReactNode;
 }>) {
     return (
-        <html suppressHydrationWarning>
+        <html lang="en" suppressHydrationWarning={true} className="dark">
         <body>
-        <Provider>
-            <SettingsProvider>
-                <VStack>
-                    <Header />
-                    <Box as={"main"} transition="all" transitionDuration="500ms">
-                        {children}
-                    </Box>
-                </VStack>
-            </SettingsProvider>
-        </Provider>
+        <Providers>
+            <div className="flex h-full flex-col">
+            <Header/>
+                <div
+                    className="mx-auto flex w-full grow flex-col px-1 pb-8 pt-2 sm:px-6 md:max-w-7xl lg:px-8 short:pb-2 short:pt-2">
+                    {children}
+                </div>
+            </div>
+        </Providers>
         </body>
         </html>
     );
