@@ -4,9 +4,12 @@ import {useEffect, useState} from "react";
 import {GameStates, Row} from "@/types";
 import Keyboard from "@/components/game/keyboard";
 import isValidWord from "../../lib/dictionary";
-import {MAX_GUESSES, REVEAL_TIME_MS, WORD_LENGTH} from "@/constants";
+import {REVEAL_TIME_MS} from "@/constants";
 import toast from "react-hot-toast";
 import GameGrid from "@/components/game/grid";
+
+const MAX_GUESSES = 6;
+const WORD_LENGTH = 5;
 
 export default function GamePanel() {
     const [rows, setRows] = useState<Row[]>([]);
@@ -17,6 +20,7 @@ export default function GamePanel() {
     const [isRevealing, setIsRevealing] = useState(false)
     let toastId: string;
 
+    console.log(gameState);
     function setRowIndex(index: number) {
         setCurrentRowIndex(Math.min(Math.max(index, 0), rows.length - 1));
     }

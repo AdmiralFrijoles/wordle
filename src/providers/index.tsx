@@ -1,6 +1,6 @@
 ﻿import React from "react";
 import {NextUIProvider} from "@nextui-org/react";
-import {SettingsProvider} from "@/context";
+import {SettingsProvider} from "@/providers/SettingsProvider";
 
 export function Providers({children}: {children: React.ReactNode}) {
     return (

@@ -32,10 +32,11 @@ model Profile {
 
 model Puzzle {
   id          String     @id @default(auto()) @map("_id") @db.ObjectId
-  name        String     @unique
+  slug        String     @unique
   title       String
   description String?
   solutions   Solution[]
+  isPublic    Boolean    @default(true)
 }
 
 model Solution {

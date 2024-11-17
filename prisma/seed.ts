@@ -12,7 +12,10 @@ const options = {
 async function main() {
     const {
         values: { environment },
-    } = parseArgs({ options })
+    } = parseArgs({
+        // @ts-expect-error TS2322
+        options
+    })
 
     const isDev = environment === 'dev';
 
@@ -32,10 +35,10 @@ async function main() {
         console.log(testUser);
 
         const testPuzzle1 = await prisma.puzzle.upsert({
-            where: {name: "testpuzzle01"},
+            where: {slug: "testpuzzle01"},
             update: {},
             create: {
-                name: "testpuzzle01",
+                slug: "testpuzzle01",
                 title: "Test Puzzle 01",
                 description: "Test puzzle number 1"
             }
@@ -58,10 +61,10 @@ async function main() {
         console.log(testPuzzle1Solution);
 
         const testPuzzle2 = await prisma.puzzle.upsert({
-            where: {name: "testpuzzle02"},
+            where: {slug: "testpuzzle02"},
             update: {},
             create: {
-                name: "testpuzzle02",
+                slug: "testpuzzle02",
                 title: "Test Puzzle 02"
             }
         });
@@ -69,10 +72,10 @@ async function main() {
     }
 
     const nytPuzzle = await prisma.puzzle.upsert({
-        where: {name: "nyt"},
+        where: {slug: "nyt"},
         update: {},
         create: {
-            name: "nyt",
+            slug: "nyt",
             title: "New York Times",
             description: "Follows the daily word of the New York Times Wordle game."
         }
@@ -80,10 +83,10 @@ async function main() {
     console.log(nytPuzzle);
 
     const dojoPuzzle = await prisma.puzzle.upsert({
-        where: {name: "dojo"},
+        where: {slug: "dojo"},
         update: {},
         create: {
-            name: "dojo",
+            slug: "dojo",
             title: "Dojo",
             description: "Words specifically chosen for the Dojo."
         }

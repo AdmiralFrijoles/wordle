@@ -1,5 +1,5 @@
 ﻿import {CharStatus} from "@/types";
-import {useSettings} from "@/context";
+import {useSettings} from "@/providers/SettingsProvider";
 import classnames from "classnames";
 import {REVEAL_TIME_MS} from "@/constants";
 

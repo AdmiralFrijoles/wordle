@@ -3,7 +3,7 @@ import HeaderIcon from "@/components/header/HeaderIcon";
 
 export default function ArchiveModal() {
     return (
-        <HeaderIcon tooltipContent="Previous Games">
+        <HeaderIcon tooltipContent="Play Previous Words">
             <CalendarDaysIcon className="dark:stroke-white"/>
         </HeaderIcon>
     )

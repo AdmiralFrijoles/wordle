@@ -1,8 +1,10 @@
 ﻿import classnames from 'classnames'
 import {CharStatus} from "@/types";
-import {useSettings} from "@/context";
-import {REVEAL_TIME_MS, WORD_LENGTH} from "@/constants";
+import {useSettings} from "@/providers/SettingsProvider";
+import {REVEAL_TIME_MS} from "@/constants";
 import React, {ReactNode} from "react";
+
+const WORD_LENGTH = 5;
 
 type Props = {
     children?: ReactNode;
