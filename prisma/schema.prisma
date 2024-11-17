@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["views"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String         @id @default(auto()) @map("_id") @db.ObjectId
+  externalId String         @unique
+  profile    Profile?
+  solutions  UserSolution[]
+}
+
+model Profile {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique @db.ObjectId
+}
+
+model Puzzle {
+  id          String     @id @map("_id") @db.ObjectId
+  title       String     @unique
+  description String?
+  solutions   Solution[]
+}
+
+model Solution {
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  puzzle        Puzzle         @relation(fields: [puzzleId], references: [id])
+  puzzleId      String         @db.ObjectId
+  date          DateTime
+  solution      String
+  maxGuesses    Int            @default(5)
+  userSolutions UserSolution[]
+
+  @@unique([puzzleId, date])
+}
+
+model UserSolution {
+  id         String            @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String            @db.ObjectId
+  user       User              @relation(fields: [userId], references: [id])
+  solutionId String            @db.ObjectId
+  solution   Solution          @relation(fields: [solutionId], references: [id])
+  state      UserSolutionState @default(UNSOLVED)
+  guesses    String[]
+}
+
+enum UserSolutionState {
+  UNSOLVED
+  WIN
+  LOSS
+}
+
+type UserPuzzleId {
+  userId String @db.ObjectId
+  puzzleId String @db.ObjectId
+}
+
+view UserPuzzleStats {
+  id              UserPuzzleId @id @map("_id")
+  puzzleTitle     String
+  winDistribution Int[]
+  wins            Int
+  losses          Int
+}
