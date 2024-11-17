@@ -16,3 +16,7 @@ export async function fetchFromCache<T>(
 
     return result;
 }
+
+export async function invalidateCache(key: string): Promise<void> {
+    await keyv.delete(key);
+}

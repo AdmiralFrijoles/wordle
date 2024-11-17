@@ -7,29 +7,33 @@ import isValidWord from "../../lib/dictionary";
 import {REVEAL_TIME_MS} from "@/constants";
 import toast from "react-hot-toast";
 import GameGrid from "@/components/game/grid";
+import {Puzzle, Solution} from "@prisma/client";
 
-const MAX_GUESSES = 6;
-const WORD_LENGTH = 5;
+type Props = {
+    puzzle: Puzzle;
+    solution: Solution;
+}
 
-export default function GamePanel() {
+export default function GamePanel({solution}: Props) {
     const [rows, setRows] = useState<Row[]>([]);
     const [currentRowIndex, setCurrentRowIndex] = useState(0);
     const [text, setText] = useState("");
-    const [solution, setSolution] = useState("");
     const [gameState, setGameState] = useState<keyof typeof GameStates>("Playing");
     const [isRevealing, setIsRevealing] = useState(false)
     let toastId: string;
 
-    console.log(gameState);
+    const wordLength: number = solution.solution.length;
+    const maxGuesses: number = solution.maxGuesses;
+
     function setRowIndex(index: number) {
         setCurrentRowIndex(Math.min(Math.max(index, 0), rows.length - 1));
     }
 
     function handleReset(){
         const temp: Row[] = [];
-        for (let i = 0; i < MAX_GUESSES; i++) {
+        for (let i = 0; i < maxGuesses; i++) {
             const tempRow: Row = [];
-            for (let j = 0; j < WORD_LENGTH; j++) {
+            for (let j = 0; j < wordLength; j++) {
                 tempRow.push({
                     value: "",
                     status: "Guessing",
@@ -39,20 +43,19 @@ export default function GamePanel() {
         }
         setRows(temp);
         setCurrentRowIndex(0);
-        //setSolution(loadSolution());
     }
     
     function handleLetterClick(letter: string) {
-        if (text.length >= WORD_LENGTH) return;
+        if (text.length >= wordLength) return;
         setText(text + letter);
     }
 
     function getStatuses() {
         const currentRow = rows[currentRowIndex];
         for (let i = 0; i < currentRow.length; i++) {
-            if (solution[i].toLocaleUpperCase() === text[i].toLocaleUpperCase())
+            if (solution.solution[i].toLocaleUpperCase() === text[i].toLocaleUpperCase())
                 currentRow[i].status = "Correct";
-            else if (solution.toLocaleUpperCase().includes(text[i].toLocaleUpperCase()))
+            else if (solution.solution.toLocaleUpperCase().includes(text[i].toLocaleUpperCase()))
                 currentRow[i].status = "Present";
             else
                 currentRow[i].status = "Absent";
@@ -61,15 +64,17 @@ export default function GamePanel() {
     }
 
     function handleSubmit() {
+        if (gameState !== "Playing") return;
+
         toast.remove(toastId);
-        if (text.length !== WORD_LENGTH) {
+        if (text.length !== wordLength) {
             toastId = toast("Not enough letters", {
                 duration: 1500,
                 style: { background: "#f56565", color: "#fff"},
             });
             return;
         }
-        const isSolution = solution.toLocaleUpperCase() === text.toLocaleUpperCase();
+        const isSolution = solution.solution.toLocaleUpperCase() === text.toLocaleUpperCase();
         if (!isValidWord(text) && !isSolution) {
             toastId = toast("Not in word list", {
                 duration: 1500,
@@ -84,7 +89,7 @@ export default function GamePanel() {
         // chars have been revealed
         setTimeout(() => {
             setIsRevealing(false)
-        }, REVEAL_TIME_MS * solution.length)
+        }, REVEAL_TIME_MS * wordLength)
 
         if (isSolution) {
             setGameState("Win");
@@ -100,12 +105,12 @@ export default function GamePanel() {
     }
 
     function deleteChar() {
+        if (gameState !== "Playing") return;
         setText((prev) => text.substring(0, prev.length - 1));
     }
 
     useEffect(() => {
         handleReset();
-        setSolution("STORE");
     }, []);
 
     useEffect(() => {

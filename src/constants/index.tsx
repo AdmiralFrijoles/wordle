@@ -1,1 +1,4 @@
-﻿export const REVEAL_TIME_MS = 350;
+﻿
+
+export const REVEAL_TIME_MS = 350;
+

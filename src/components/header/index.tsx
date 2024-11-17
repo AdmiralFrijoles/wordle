@@ -4,25 +4,26 @@ import SettingsModal from "@/components/modal/SettingsModal";
 import ArchiveModal from "@/components/modal/ArchiveModal";
 import CurrentUser from "@/components/header/CurrentUser";
 import PuzzleButton from "@/components/header/PuzzleButton";
-import {PrismaClient} from "@prisma/client";
+import {getPuzzleCount} from "@/lib/puzzle-service";
+import {getAppSetting} from "@/lib/settings-service";
+import { SETTING_APP_TITLE } from "@/constants/settings";
+import Link from "next/link";
 
 export default async function Header() {
-    const prisma = new PrismaClient();
-    const hasMultiplePuzzles: boolean = (await prisma.puzzle.count({
-        where: {isPublic: true}
-    })) > 1;
+    const puzzleCount = await getPuzzleCount();
+    const headerTitle = await getAppSetting<string>(SETTING_APP_TITLE);
 
     return (
         <div className="navbar border-slate-300 dark:border-slate-700">
             <div className="navbar-content px-5 short:h-auto">
                 <div className="flex-1 flex justify-start mr-auto space-x-2">
                     <GuideModal/>
-                    {hasMultiplePuzzles && <PuzzleButton/>}
+                    {puzzleCount > 1 && <PuzzleButton/>}
                     <ArchiveModal/>
                 </div>
-                <p className="prevent-select mx-4 text-xl font-bold text-nowrap dark:text-white">
-                    Dojo Wordle
-                </p>
+                    <Link className="prevent-select mx-4 text-xl font-bold text-nowrap dark:text-white" href="/">
+                        {headerTitle}
+                    </Link>
                 <div className="flex-1 flex justify-end ml-auto space-x-2">
                     <RankingModal/>
                     <CurrentUser/>
