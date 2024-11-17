@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["views"]
 }
 
@@ -16,31 +16,35 @@ datasource db {
 
 model User {
   id         String         @id @default(auto()) @map("_id") @db.ObjectId
-  externalId String         @unique
+  username   String         @unique
+  externalId String?        @unique
   profile    Profile?
   solutions  UserSolution[]
 }
 
 model Profile {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id])
-  userId String @unique @db.ObjectId
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String  @unique @db.ObjectId
+  picture     String?
+  displayName String?
 }
 
 model Puzzle {
-  id          String     @id @map("_id") @db.ObjectId
-  title       String     @unique
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  name        String     @unique
+  title       String
   description String?
   solutions   Solution[]
 }
 
 model Solution {
   id            String         @id @default(auto()) @map("_id") @db.ObjectId
-  puzzle        Puzzle         @relation(fields: [puzzleId], references: [id])
+  puzzle        Puzzle         @relation(fields: [puzzleId], references: [id], onDelete: Cascade)
   puzzleId      String         @db.ObjectId
   date          DateTime
   solution      String
-  maxGuesses    Int            @default(5)
+  maxGuesses    Int            @default(6)
   userSolutions UserSolution[]
 
   @@unique([puzzleId, date])
@@ -49,9 +53,9 @@ model Solution {
 model UserSolution {
   id         String            @id @default(auto()) @map("_id") @db.ObjectId
   userId     String            @db.ObjectId
-  user       User              @relation(fields: [userId], references: [id])
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   solutionId String            @db.ObjectId
-  solution   Solution          @relation(fields: [solutionId], references: [id])
+  solution   Solution          @relation(fields: [solutionId], references: [id], onDelete: Cascade)
   state      UserSolutionState @default(UNSOLVED)
   guesses    String[]
 }
@@ -63,7 +67,7 @@ enum UserSolutionState {
 }
 
 type UserPuzzleId {
-  userId String @db.ObjectId
+  userId   String @db.ObjectId
   puzzleId String @db.ObjectId
 }
 
