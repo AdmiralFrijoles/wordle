@@ -1,7 +1,7 @@
 ﻿import {PrismaClient} from "@prisma/client"
 import {parseArgs} from 'node:util'
 import {startOfToday,formatISO} from "date-fns";
-import {utc} from "@date-fns/utc"
+import {UTCDate} from "@date-fns/utc"
 
 const prisma = new PrismaClient();
 
@@ -20,20 +20,6 @@ async function main() {
     const isDev = environment === 'dev';
 
     if (isDev) {
-        const testUser = await prisma.user.upsert({
-            where: {username: "testuser01"},
-            update: {},
-            create: {
-                username: "testuser01",
-                profile: {
-                    create: {
-                        displayName: "Test User 01"
-                    }
-                }
-            }
-        });
-        console.log(testUser);
-
         const testPuzzle1 = await prisma.puzzle.upsert({
             where: {slug: "testpuzzle01"},
             update: {},
@@ -45,15 +31,16 @@ async function main() {
         });
         console.log(testPuzzle1);
 
-        const todayOnly = formatISO(startOfToday({in: utc}));
+        const solutionDate = startOfToday();
+        const isoDate = formatISO(new UTCDate(solutionDate.getFullYear(), solutionDate.getMonth(), solutionDate.getDate()));
         const testPuzzle1Solution = await prisma.solution.upsert({
             where: {
-                puzzleId_date: {puzzleId: testPuzzle1.id, date: todayOnly}
+                puzzleId_date: {puzzleId: testPuzzle1.id, date: isoDate}
             },
             update: {},
             create: {
                 puzzleId: testPuzzle1.id,
-                date: todayOnly,
+                date: isoDate,
                 solution: "TESTS",
                 maxGuesses: 6
             }
