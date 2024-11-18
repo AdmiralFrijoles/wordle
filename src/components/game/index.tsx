@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import {useEffect, useState} from "react";
-import {GameStates, Row} from "@/types";
+import {GameStates, IUserPuzzleSolution, Row} from "@/types";
 import Keyboard from "@/components/game/keyboard";
 import isValidWord from "../../lib/dictionary";
 import {REVEAL_TIME_MS} from "@/constants";
@@ -12,22 +12,20 @@ import {Puzzle, Solution} from "@prisma/client";
 type Props = {
     puzzle: Puzzle;
     solution: Solution;
+    initialUserSolution: IUserPuzzleSolution | null;
 }
 
-export default function GamePanel({solution}: Props) {
+export default function GamePanel({solution, initialUserSolution}: Props) {
+    const [userSolution, setUserSolution] = useState<IUserPuzzleSolution | null>(initialUserSolution);
     const [rows, setRows] = useState<Row[]>([]);
     const [currentRowIndex, setCurrentRowIndex] = useState(0);
     const [text, setText] = useState("");
-    const [gameState, setGameState] = useState<keyof typeof GameStates>("Playing");
+    const [gameState, setGameState] = useState<keyof typeof GameStates>("Unsolved");
     const [isRevealing, setIsRevealing] = useState(false)
-    let toastId: string;
+    const [toastId, setToastId] = useState<string | undefined>();
 
     const wordLength: number = solution.solution.length;
     const maxGuesses: number = solution.maxGuesses;
-
-    function setRowIndex(index: number) {
-        setCurrentRowIndex(Math.min(Math.max(index, 0), rows.length - 1));
-    }
 
     function handleReset(){
         const temp: Row[] = [];
@@ -46,6 +44,7 @@ export default function GamePanel({solution}: Props) {
     }
     
     function handleLetterClick(letter: string) {
+        if (gameState !== "Unsolved") return;
         if (text.length >= wordLength) return;
         setText(text + letter);
     }
@@ -64,48 +63,63 @@ export default function GamePanel({solution}: Props) {
     }
 
     function handleSubmit() {
-        if (gameState !== "Playing") return;
+        function getGuesses() {
+            return rows
+                .slice(0, currentRowIndex)
+                .map(row => row.flatMap(cell => cell.value).join());
+        }
+
+        if (gameState !== "Unsolved" || isRevealing) return;
 
         toast.remove(toastId);
         if (text.length !== wordLength) {
-            toastId = toast("Not enough letters", {
+            setToastId(toast("Not enough letters", {
                 duration: 1500,
                 style: { background: "#f56565", color: "#fff"},
-            });
+            }));
             return;
         }
         const isSolution = solution.solution.toLocaleUpperCase() === text.toLocaleUpperCase();
         if (!isValidWord(text) && !isSolution) {
-            toastId = toast("Not in word list", {
+            setToastId(toast("Not in word list", {
                 duration: 1500,
                 style: { background: "#f56565", color: "#fff"},
-            });
+            }));
             return;
         }
 
-        setIsRevealing(true)
-        getStatuses();
-        // turn this back off after all
-        // chars have been revealed
-        setTimeout(() => {
-            setIsRevealing(false)
-        }, REVEAL_TIME_MS * wordLength)
+        try {
+            setIsRevealing(true)
+            getStatuses();
+            // turn this back off after all
+            // chars have been revealed
+            setTimeout(() => {
+                setIsRevealing(false)
+            }, REVEAL_TIME_MS * wordLength)
 
-        if (isSolution) {
-            setGameState("Win");
-            setRowIndex(currentRowIndex + 1);
-            return;
+            if (isSolution) {
+                setGameState("Win");
+                setCurrentRowIndex(currentRowIndex + 1);
+                return;
+            }
+            if (currentRowIndex === rows.length - 1) {
+                setGameState("Loss");
+                return;
+            }
+            setText("");
+            setCurrentRowIndex(currentRowIndex + 1);
         }
-        if (currentRowIndex === rows.length - 1) {
-            setGameState("Lose");
-            return;
+        finally {
+            setUserSolution({
+                ...userSolution,
+                guesses: getGuesses(),
+                state: gameState
+            } as IUserPuzzleSolution)
         }
-        setText("");
-        setRowIndex(currentRowIndex + 1);
     }
 
     function deleteChar() {
-        if (gameState !== "Playing") return;
+        if (gameState !== "Unsolved" || isRevealing) return;
         setText((prev) => text.substring(0, prev.length - 1));
     }
 
@@ -125,6 +139,8 @@ export default function GamePanel({solution}: Props) {
         }
         setRows([...rows]);
     }, [text]);
+
+    // useEffect on userSolution to save to db/local storage when updated
 
     return (
         <div className="mx-auto flex w-full grow flex-col px-1 pb-8 pt-2 sm:px-6 md:max-w-7xl lg:px-8 short:pb-2 short:pt-2">

@@ -117,6 +117,8 @@ model UserSolution {
   solution   Solution          @relation(fields: [solutionId], references: [id], onDelete: Cascade)
   state      UserSolutionState @default(UNSOLVED)
   guesses    String[]
+
+  @@unique([userId, solutionId])
 }
 
 enum UserSolutionState {

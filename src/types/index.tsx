@@ -1,7 +1,7 @@
 ﻿export enum GameStates {
-    Playing = 0,
+    Unsolved = 0,
     Win = 1,
-    Lose = 2
+    Loss = 2
 }
 
 export enum Status {
@@ -19,3 +19,11 @@ interface Cell {
 }
 
 export type Row = Cell[];
+
+
+export interface IUserPuzzleSolution {
+    userId: string;
+    solutionId: string;
+    state: keyof typeof GameStates;
+    guesses: string[];
+}

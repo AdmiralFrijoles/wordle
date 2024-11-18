@@ -1,9 +1,11 @@
 ﻿import {notFound, redirect} from "next/navigation";
 import {getDefaultPuzzle, getPuzzleBySlug, getPuzzleSolution} from "@/lib/puzzle-service";
 import {Puzzle} from "@prisma/client";
-import PuzzlePage from "@/app/[[...puzzle]]/page.client";
 import {startOfToday, format, compareDesc} from "date-fns";
 import NoSolution from "@/app/[[...puzzle]]/no-solution";
+import GamePanel from "@/components/game";
+import {auth} from "@/lib/auth";
+import {getUserSolution} from "@/lib/user-service";
 
 function getPuzzleDateFromRoute(route: string[]): Date {
     const today = startOfToday();
@@ -20,6 +22,7 @@ function getPuzzleDateFromRoute(route: string[]): Date {
 }
 
 export default async function Page({params}: {params: Promise<{puzzle: string[]}>}) {
+    const session = await auth();
     const routeParams = (await params).puzzle;
     const slug: string | null = routeParams && routeParams.length > 0 ? routeParams[0] : null;
     const date: Date = getPuzzleDateFromRoute(routeParams);
@@ -41,6 +44,7 @@ export default async function Page({params}: {params: Promise<{puzzle: string[]}
     }
 
     const solution = await getPuzzleSolution(puzzle.id, date);
+    const userSolution = solution && session?.user?.id ? await getUserSolution(session?.user?.id, solution.id) : null;
 
     return (
         <div>
@@ -48,7 +52,10 @@ export default async function Page({params}: {params: Promise<{puzzle: string[]}
                 <h2 className="text-lg font-semibold dark:text-white">{puzzle.title}</h2>
                 <h3 className="text-sm dark:text-white">{format(date, "PPPP")}</h3>
             </div>
-            {solution ? <PuzzlePage puzzle={puzzle} solution={solution}/> : <NoSolution puzzle={puzzle} date={date}/>}
+            {solution ?
+                <GamePanel puzzle={puzzle} solution={solution} initialUserSolution={userSolution} /> :
+                <NoSolution puzzle={puzzle} date={date}/>
+            }
         </div>
     )
 }
