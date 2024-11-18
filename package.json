@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "dev-seed": "npx prisma db seed -- --environment dev"
+    "dev-seed": "prisma db seed -- --environment dev"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"commonjs\",\"moduleResolution\":\"classic\",\"resolveJsonModule\":false} --transpile-only prisma/seed.ts"
