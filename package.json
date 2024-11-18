@@ -13,6 +13,7 @@
     "seed": "ts-node --compiler-options {\"module\":\"commonjs\",\"moduleResolution\":\"classic\",\"resolveJsonModule\":false} --transpile-only prisma/seed.ts"
   },
   "dependencies": {
+    "@auth0/nextjs-auth0": "4.0.0-beta.3",
     "@date-fns/utc": "^2.1.0",
     "@emotion/react": "^11.13.3",
     "@heroicons/react": "^2.1.5",
