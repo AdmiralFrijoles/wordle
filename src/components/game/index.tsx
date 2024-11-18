@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {GameStates, IUserPuzzleSolution, Row} from "@/types";
 import Keyboard from "@/components/game/keyboard";
 import isValidWord from "../../lib/dictionary";
@@ -8,6 +8,7 @@ import {REVEAL_TIME_MS} from "@/constants";
 import toast from "react-hot-toast";
 import GameGrid from "@/components/game/grid";
 import {Puzzle, Solution} from "@prisma/client";
+import {useDebounce, useEffectOnce, useUpdateEffect} from "react-use";
 
 type Props = {
     puzzle: Puzzle;
@@ -23,6 +24,7 @@ export default function GamePanel({solution, initialUserSolution}: Props) {
     const [gameState, setGameState] = useState<keyof typeof GameStates>("Unsolved");
     const [isRevealing, setIsRevealing] = useState(false)
     const [toastId, setToastId] = useState<string | undefined>();
+    const timer = useRef<NodeJS.Timeout>();
 
     const wordLength: number = solution.solution.length;
     const maxGuesses: number = solution.maxGuesses;
@@ -63,13 +65,7 @@ export default function GamePanel({solution, initialUserSolution}: Props) {
     }
 
     function handleSubmit() {
-        function getGuesses() {
-            return rows
-                .slice(0, currentRowIndex)
-                .map(row => row.flatMap(cell => cell.value).join());
-        }
-
-        if (gameState !== "Unsolved" || isRevealing) return;
+        if (gameState !== "Unsolved") return;
 
         toast.remove(toastId);
         if (text.length !== wordLength) {
@@ -88,44 +84,33 @@ export default function GamePanel({solution, initialUserSolution}: Props) {
             return;
         }
 
-        try {
-            setIsRevealing(true)
-            getStatuses();
-            // turn this back off after all
-            // chars have been revealed
-            setTimeout(() => {
-                setIsRevealing(false)
-            }, REVEAL_TIME_MS * wordLength)
+        setIsRevealing(true)
+        getStatuses();
+        clearTimeout(timer.current)
+        timer.current = setTimeout(() => {
+            setIsRevealing(false)
+        }, REVEAL_TIME_MS * wordLength);
 
-            if (isSolution) {
-                setGameState("Win");
-                setCurrentRowIndex(currentRowIndex + 1);
-                return;
-            }
-            if (currentRowIndex === rows.length - 1) {
-                setGameState("Loss");
-                return;
-            }
+        if (isSolution) {
+            setGameState("Win");
+        } else if (currentRowIndex === rows.length - 1) {
+            setGameState("Loss");
+        } else {
             setText("");
-            setCurrentRowIndex(currentRowIndex + 1);
         }
-        finally {
-            setUserSolution({
-                ...userSolution,
-                guesses: getGuesses(),
-                state: gameState
-            } as IUserPuzzleSolution)
-        }
+        setCurrentRowIndex(currentRowIndex + 1);
+
+        return () => clearTimeout(timer.current);
     }
 
     function deleteChar() {
-        if (gameState !== "Unsolved" || isRevealing) return;
+        if (gameState !== "Unsolved") return;
         setText((prev) => text.substring(0, prev.length - 1));
     }
 
-    useEffect(() => {
+    useEffectOnce(() => {
         handleReset();
-    }, []);
+    });
 
     useEffect(() => {
         if (rows.length === 0) return;
@@ -140,7 +125,33 @@ export default function GamePanel({solution, initialUserSolution}: Props) {
         setRows([...rows]);
     }, [text]);
 
-    // useEffect on userSolution to save to db/local storage when updated
+    useDebounce(() => {
+        // Don't save state if the user hasn't started playing.
+        if (currentRowIndex <= 0) return;
+
+        function getGuesses() {
+            return rows
+                .slice(0, currentRowIndex)
+                .map(row => row.flatMap(cell => cell.value).join(""));
+        }
+
+        setUserSolution({
+            ...userSolution,
+            guesses: getGuesses(),
+            state: gameState
+        } as IUserPuzzleSolution)
+    }, 1000, [gameState, currentRowIndex]);
+
+    useUpdateEffect(() => {
+        // Don't save state if the user hasn't started playing.
+        if (!userSolution || currentRowIndex <= 0) return;
+
+        async function saveUserSolution() {
+            // Save to db/local storage
+            console.log("SAVE USER SOLUTION", userSolution);
+        }
+        saveUserSolution();
+    }, [userSolution]);
 
     return (
         <div className="mx-auto flex w-full grow flex-col px-1 pb-8 pt-2 sm:px-6 md:max-w-7xl lg:px-8 short:pb-2 short:pt-2">
