@@ -5,10 +5,10 @@ import {GameStates, IUserPuzzleSolution, Row} from "@/types";
 import Keyboard from "@/components/game/keyboard";
 import isValidWord from "../../lib/dictionary";
 import {REVEAL_TIME_MS} from "@/constants";
-import toast from "react-hot-toast";
 import GameGrid from "@/components/game/grid";
 import {Puzzle, Solution} from "@prisma/client";
 import {useDebounce, useEffectOnce, useUpdateEffect} from "react-use";
+import {alertError, clearAlert} from "@/lib/alerts";
 
 type Props = {
     puzzle: Puzzle;
@@ -23,7 +23,7 @@ export default function GamePanel({solution, initialUserSolution}: Props) {
     const [text, setText] = useState("");
     const [gameState, setGameState] = useState<keyof typeof GameStates>("Unsolved");
     const [isRevealing, setIsRevealing] = useState(false)
-    const [toastId, setToastId] = useState<string | undefined>();
+    const [alertId, setAlertId] = useState<string | undefined>();
     const timer = useRef<NodeJS.Timeout>();
 
     const wordLength: number = solution.solution.length;
@@ -67,20 +67,14 @@ export default function GamePanel({solution, initialUserSolution}: Props) {
     function handleSubmit() {
         if (gameState !== "Unsolved") return;
 
-        toast.remove(toastId);
+        clearAlert(alertId);
         if (text.length !== wordLength) {
-            setToastId(toast("Not enough letters", {
-                duration: 1500,
-                style: { background: "#f56565", color: "#fff"},
-            }));
+            setAlertId(alertError("Not enough letters", 1500));
             return;
         }
         const isSolution = solution.solution.toLocaleUpperCase() === text.toLocaleUpperCase();
         if (!isValidWord(text) && !isSolution) {
-            setToastId(toast("Not in word list", {
-                duration: 1500,
-                style: { background: "#f56565", color: "#fff"},
-            }));
+            setAlertId(alertError("Not in word list", 1500));
             return;
         }
 

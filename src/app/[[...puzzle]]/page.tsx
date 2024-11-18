@@ -6,6 +6,8 @@ import NoSolution from "@/app/[[...puzzle]]/no-solution";
 import GamePanel from "@/components/game";
 import {auth} from "@/lib/auth";
 import {getUserSolution} from "@/lib/user-service";
+import { Tooltip } from "@nextui-org/react";
+import PuzzleLinkButton from "@/components/PuzzleLinkButton";
 
 function getPuzzleDateFromRoute(route: string[]): Date {
     const today = startOfToday();
@@ -49,11 +51,16 @@ export default async function Page({params}: {params: Promise<{puzzle: string[]}
     return (
         <div>
             <div className="flex grow flex-col items-center justify-center pb-6 short:pb-2">
-                <h2 className="text-lg font-semibold dark:text-white">{puzzle.title}</h2>
+                <div className="flex items-center justify-center">
+                    <Tooltip content={puzzle.description} delay={300}  placement="bottom">
+                        <h2 className="text-lg font-semibold dark:text-white">{puzzle.title}</h2>
+                    </Tooltip>
+                    {solution && <PuzzleLinkButton link={`/${puzzle.slug}/${format(date, "yyyy/MM/dd")}`}/>}
+                </div>
                 <h3 className="text-sm dark:text-white">{format(date, "PPPP")}</h3>
             </div>
             {solution ?
-                <GamePanel puzzle={puzzle} solution={solution} initialUserSolution={userSolution} /> :
+                <GamePanel puzzle={puzzle} solution={solution} initialUserSolution={userSolution}/> :
                 <NoSolution puzzle={puzzle} date={date}/>
             }
         </div>
