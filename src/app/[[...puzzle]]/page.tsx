@@ -8,6 +8,7 @@ import {auth} from "@/lib/auth";
 import {getUserSolution} from "@/lib/user-service";
 import { Tooltip } from "@nextui-org/react";
 import PuzzleLinkButton from "@/components/PuzzleLinkButton";
+import {IUserPuzzleSolution} from "@/types";
 
 function getPuzzleDateFromRoute(route: string[]): Date {
     const today = startOfToday();
@@ -46,7 +47,16 @@ export default async function Page({params}: {params: Promise<{puzzle: string[]}
     }
 
     const solution = await getPuzzleSolution(puzzle.id, date);
-    const userSolution = solution && session?.user?.id ? await getUserSolution(session?.user?.id, solution.id) : null;
+
+    const defaultUserSolution = {
+        solutionId: solution?.id,
+        userId: session?.user?.id,
+        guesses: [],
+        state: "Unsolved"
+    } as IUserPuzzleSolution;
+
+    const userSolution = (solution && session?.user?.id) ?
+        await getUserSolution(session?.user?.id, solution.id) ?? defaultUserSolution : defaultUserSolution;
 
     return (
         <div>

@@ -9,15 +9,17 @@ import GameGrid from "@/components/game/grid";
 import {Puzzle, Solution} from "@prisma/client";
 import {useDebounce, useEffectOnce, useUpdateEffect} from "react-use";
 import {alertError, clearAlert} from "@/lib/alerts";
+import {upsertUserSolution} from "@/lib/user-service";
 
 type Props = {
     puzzle: Puzzle;
     solution: Solution;
-    initialUserSolution: IUserPuzzleSolution | null;
+    initialUserSolution: IUserPuzzleSolution;
 }
 
 export default function GamePanel({solution, initialUserSolution}: Props) {
-    const [userSolution, setUserSolution] = useState<IUserPuzzleSolution | null>(initialUserSolution);
+    const [userSolution, setUserSolution] = useState<IUserPuzzleSolution>(initialUserSolution);
+    const [userSolutionLoading, setUserSolutionLoading] = useState(false);
     const [rows, setRows] = useState<Row[]>([]);
     const [currentRowIndex, setCurrentRowIndex] = useState(0);
     const [text, setText] = useState("");
@@ -29,7 +31,7 @@ export default function GamePanel({solution, initialUserSolution}: Props) {
     const wordLength: number = solution.solution.length;
     const maxGuesses: number = solution.maxGuesses;
 
-    function handleReset(){
+    function initRows() {
         const temp: Row[] = [];
         for (let i = 0; i < maxGuesses; i++) {
             const tempRow: Row = [];
@@ -41,10 +43,9 @@ export default function GamePanel({solution, initialUserSolution}: Props) {
             }
             temp.push(tempRow);
         }
-        setRows(temp);
-        setCurrentRowIndex(0);
+        return temp;
     }
-    
+
     function handleLetterClick(letter: string) {
         if (gameState !== "Unsolved") return;
         if (text.length >= wordLength) return;
@@ -103,7 +104,18 @@ export default function GamePanel({solution, initialUserSolution}: Props) {
     }
 
     useEffectOnce(() => {
-        handleReset();
+        setUserSolutionLoading(true);
+        if (!userSolution.userId) {
+            const localStorageValue = localStorage.getItem(`user-solution-${initialUserSolution.solutionId}`);
+            if (localStorageValue) {
+                try {
+                    const localUserSolution = JSON.parse(localStorageValue) as IUserPuzzleSolution;
+                    setUserSolution(localUserSolution);
+                } catch (e) {
+                    console.error("Failed to load solution from local storage:", e);
+                }
+            }
+        }
     });
 
     useEffect(() => {
@@ -134,18 +146,52 @@ export default function GamePanel({solution, initialUserSolution}: Props) {
             guesses: getGuesses(),
             state: gameState
         } as IUserPuzzleSolution)
-    }, 1000, [gameState, currentRowIndex]);
+    }, 100, [gameState, currentRowIndex]);
 
     useUpdateEffect(() => {
-        // Don't save state if the user hasn't started playing.
-        if (!userSolution || currentRowIndex <= 0) return;
-
         async function saveUserSolution() {
-            // Save to db/local storage
-            console.log("SAVE USER SOLUTION", userSolution);
+            // Don't save state if the user hasn't started playing.
+            if (userSolutionLoading || !userSolution || currentRowIndex <= 0) return;
+
+            if (userSolution.userId) {
+                console.log("SAVE USER SOLUTION: DB", userSolution);
+                await upsertUserSolution(userSolution!);
+            } else {
+                console.log("SAVE USER SOLUTION: LOCAL STORAGE", userSolution);
+                localStorage.setItem(`user-solution-${userSolution.solutionId}`, JSON.stringify(userSolution));
+            }
         }
+
+        if (!rows || userSolutionLoading) return;
+
         saveUserSolution();
     }, [userSolution]);
+
+    useUpdateEffect(() => {
+        if (!userSolutionLoading) return;
+
+        const tempRows = initRows();
+
+        const numRows = Math.min(userSolution.guesses.length, maxGuesses);
+        for (let r = 0; r < numRows; r++) {
+            const numChars = Math.min(userSolution.guesses[r].length, wordLength);
+            for (let c = 0; c < numChars; c++) {
+                const letter = userSolution.guesses[r][c];
+                tempRows[r][c].value = letter;
+                if (solution.solution[c].toLocaleUpperCase() === letter.toLocaleUpperCase())
+                    tempRows[r][c].status = "Correct";
+                else if (solution.solution.toLocaleUpperCase().includes(letter.toLocaleUpperCase()))
+                    tempRows[r][c].status = "Present";
+                else
+                    tempRows[r][c].status = "Absent";
+            }
+        }
+        setCurrentRowIndex(userSolution.guesses.length);
+
+        setRows(tempRows);
+        setUserSolutionLoading(false);
+
+    }, [userSolutionLoading]);
 
     return (
         <div className="mx-auto flex w-full grow flex-col px-1 pb-8 pt-2 sm:px-6 md:max-w-7xl lg:px-8 short:pb-2 short:pt-2">

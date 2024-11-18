@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import {GameStates, IUserPuzzleSolution} from "@/types";
 import {UserSolution, UserSolutionState} from "@prisma/client";
+import {auth} from "@/lib/auth";
 
 function toGameState(state: UserSolutionState): keyof typeof GameStates {
     switch (state) {
@@ -56,7 +57,14 @@ export async function getUserSolution(userId: string, solutionId: string): Promi
     return null;
 }
 
-export async function setUserSolution(userSolution: IUserPuzzleSolution): Promise<void> {
+export async function upsertUserSolution(userSolution: IUserPuzzleSolution): Promise<void> {
+    const session = await auth();
+    if (!session) {
+        throw new Error("Not authorized");
+    } else if (session.user?.id != userSolution.userId && session.user.role !== "admin") {
+        throw new Error("Not authorized");
+    }
+
     await prisma.userSolution.upsert({
         where: {
             userId_solutionId: {
