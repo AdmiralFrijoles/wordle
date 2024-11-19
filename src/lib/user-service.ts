@@ -65,22 +65,73 @@ export async function upsertUserSolution(userSolution: IUserPuzzleSolution): Pro
         throw new Error("Not authorized");
     }
 
-    await prisma.userSolution.upsert({
-        where: {
-            userId_solutionId: {
+    // Allow admins to change solutions
+    if (session.user.role === "admin") {
+        console.log("Admin upsert")
+        await prisma.userSolution.upsert({
+            where: {
+                userId_solutionId: {
+                    userId: userSolution.userId,
+                    solutionId: userSolution.solutionId
+                }
+            },
+            update: {
+                guesses: userSolution.guesses,
+                state: fromGameState(userSolution.state)
+            },
+            create: {
                 userId: userSolution.userId,
-                solutionId: userSolution.solutionId
+                solutionId: userSolution.solutionId,
+                guesses: userSolution.guesses,
+                state: fromGameState(userSolution.state)
             }
-        },
-        update: {
-            guesses: userSolution.guesses,
-            state: fromGameState(userSolution.state)
-        },
-        create: {
-            userId: userSolution.userId,
-            solutionId: userSolution.solutionId,
-            guesses: userSolution.guesses,
-            state: fromGameState(userSolution.state)
+        });
+    } else {
+        const existingSolution = await prisma.userSolution.findUnique({
+            where: {
+                userId_solutionId: {
+                    userId: userSolution.userId,
+                    solutionId: userSolution.solutionId
+                }
+            },
+        });
+
+        console.log("existingSolution", existingSolution);
+
+        if (!existingSolution) {
+            await prisma.userSolution.create({
+                data: {
+                    userId: userSolution.userId,
+                    solutionId: userSolution.solutionId,
+                    guesses: userSolution.guesses,
+                    state: fromGameState(userSolution.state)
+                }
+            });
+        } else {
+            // User cannot change the state of a completed solution
+            if (existingSolution.state === "WIN" || existingSolution.state === "LOSS") {
+                console.log("Cannot change state of completed solution.")
+                return;
+            }
+
+            existingSolution.state = fromGameState(userSolution.state);
+
+            // User can only add new guesses, not modify old ones.
+            if (existingSolution.guesses.length < userSolution.guesses.length) {
+                const guessesToAdd = userSolution.guesses.slice(existingSolution.guesses.length, userSolution.guesses.length);
+                console.log("guessesToAdd", guessesToAdd)
+                existingSolution.guesses = [...existingSolution.guesses.concat(guessesToAdd)];
+            }
+
+            await prisma.userSolution.update({
+                where: {id: existingSolution.id},
+                data: {
+                    guesses: existingSolution.guesses,
+                    state: existingSolution.state
+                }
+            });
         }
-    });
+    }
+
+
 }

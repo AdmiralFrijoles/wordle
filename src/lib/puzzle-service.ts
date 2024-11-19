@@ -69,7 +69,6 @@ export async function getDefaultPuzzle(): Promise<Puzzle | null> {
 
 export async function getPuzzleSolution(puzzleId: string, solutionDate: Date): Promise<Solution | null> {
     const isoDate = formatISO(new UTCDate(solutionDate.getFullYear(), solutionDate.getMonth(), solutionDate.getDate()));
-    console.log(puzzleId, isoDate);
     return prisma.solution.findUnique({
         where: {
             puzzleId_date: {
