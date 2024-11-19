@@ -1,6 +1,7 @@
 ﻿import {CharStatus, Row} from "@/types";
 import {useEffect, useMemo} from "react";
 import Key from "@/components/game/key";
+import {BackspaceIcon} from "@heroicons/react/24/outline";
 
 const keyboardLayout = [
     ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
@@ -57,9 +58,7 @@ export default function Keyboard({
             <div key={rowIndex}
                  className={rowIndex < keyboardRowCount - 1 ? "mb-1 flex justify-center" : "flex justify-center"}>
                 {(rowIndex === keyboardRowCount - 1) &&
-                <Key width={65.4} value="ENTER" onClick={onSubmit}>
-                    ENTER
-                </Key>}
+                <Key value="ENTER" onClick={onSubmit} />}
                 {row.map(key => (
                     <Key key={key}
                          value={key}
@@ -68,8 +67,8 @@ export default function Keyboard({
                          isRevealing={isRevealing}/>
                 ))}
                 {(rowIndex === keyboardRowCount - 1) &&
-                <Key width={65.4} value="DELETE" onClick={onDelete}>
-                    DELETE
+                <Key value="DELETE" onClick={onDelete}>
+                    <BackspaceIcon className="h-[1.3rem] w-[1.3rem] stroke-2"/>
                 </Key>}
             </div>
             ))}

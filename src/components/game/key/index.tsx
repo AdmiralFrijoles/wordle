@@ -11,16 +11,20 @@ type Props = {
     value: string;
     onClick?: (letter: string) => void;
     status?: CharStatus;
-    width?:  number;
     isRevealing?: boolean;
 };
 
-export default function Key({ children, value, status, onClick, width = 40, isRevealing }: Props) {
+export default function Key({ children, value, status, onClick, isRevealing }: Props) {
     const settings = useSettings();
     const keyDelayMs = REVEAL_TIME_MS * WORD_LENGTH;
     const classes = classnames(
-        'prevent-select xxshort:h-8 xxshort:w-8 xxshort:text-xxs xshort:w-10 xshort:h-10 flex short:h-12 h-14 items-center justify-center rounded mx-0.5 text-xs font-bold cursor-pointer select-none dark:text-white',
+        'prevent-select xxshort:h-8 xshort:h-10 flex ' +
+        'short:h-12 h-14 items-center justify-center rounded mx-[0.17rem] my-[0.1rem] ' +
+        'short:text-xs font-bold cursor-pointer select-none dark:text-white',
         {
+            'w-12 text-ss': value === "ENTER",
+            'w-12': value === "DELETE",
+
             'transition ease-in-out': isRevealing,
             'bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 active:bg-slate-400': !status || status === "Guessing",
             'bg-slate-400 dark:bg-slate-800 text-white': status === 'Absent',
@@ -32,12 +36,14 @@ export default function Key({ children, value, status, onClick, width = 40, isRe
                 status === 'Correct' && !settings.isHighContrast,
             'bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700 text-white':
                 status === 'Present' && !settings.isHighContrast,
+
+            'w-8 text-xl': value !== "ENTER" && value !== "DELETE",
         }
     )
 
     const styles = {
         transitionDelay: isRevealing ? `${keyDelayMs}ms` : 'unset',
-        width: `${width}px`,
+        //width: `${width}px`,
     }
 
     function handleOnLetterClick(event: React.MouseEvent<HTMLButtonElement>) {
