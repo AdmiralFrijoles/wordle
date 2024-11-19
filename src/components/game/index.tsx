@@ -20,6 +20,7 @@ type Props = {
 export default function GamePanel({solution, initialUserSolution}: Props) {
     const [userSolution, setUserSolution] = useState<IUserPuzzleSolution>(initialUserSolution);
     const [userSolutionLoading, setUserSolutionLoading] = useState(false);
+    const [loadedSolved, setLoadedSolved] = useState(false);
     const [rows, setRows] = useState<Row[]>([]);
     const [currentRowIndex, setCurrentRowIndex] = useState(0);
     const [text, setText] = useState("");
@@ -153,12 +154,19 @@ export default function GamePanel({solution, initialUserSolution}: Props) {
             // Don't save state if the user hasn't started playing.
             if (userSolutionLoading || !userSolution || currentRowIndex <= 0) return;
 
+            // If the solution is already solved, no need to save.
+            if (loadedSolved) return;
+
             if (userSolution.userId) {
                 console.log("SAVE USER SOLUTION: DB", userSolution);
                 await upsertUserSolution(userSolution!);
             } else {
                 console.log("SAVE USER SOLUTION: LOCAL STORAGE", userSolution);
                 localStorage.setItem(`user-solution-${userSolution.solutionId}`, JSON.stringify(userSolution));
+            }
+
+            if (userSolution.state !== "Unsolved") {
+                setLoadedSolved(true);
             }
         }
 
@@ -171,7 +179,6 @@ export default function GamePanel({solution, initialUserSolution}: Props) {
         if (!userSolutionLoading) return;
 
         const tempRows = initRows();
-
         const numRows = Math.min(userSolution.guesses.length, maxGuesses);
         for (let r = 0; r < numRows; r++) {
             const numChars = Math.min(userSolution.guesses[r].length, wordLength);
@@ -186,11 +193,12 @@ export default function GamePanel({solution, initialUserSolution}: Props) {
                     tempRows[r][c].status = "Absent";
             }
         }
-        setCurrentRowIndex(userSolution.guesses.length);
 
+        setCurrentRowIndex(userSolution.guesses.length);
+        setGameState(userSolution.state);
         setRows(tempRows);
         setUserSolutionLoading(false);
-
+        setLoadedSolved(userSolution.state !== "Unsolved"); // Prevents solution from being saved when it is already completed.
     }, [userSolutionLoading]);
 
     return (
