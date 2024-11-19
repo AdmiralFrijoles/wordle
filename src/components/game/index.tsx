@@ -7,9 +7,10 @@ import isValidWord from "../../lib/dictionary";
 import {REVEAL_TIME_MS} from "@/constants";
 import GameGrid from "@/components/game/grid";
 import {Puzzle, Solution} from "@prisma/client";
-import {useDebounce, useEffectOnce, useUpdateEffect} from "react-use";
+import {useBeforeUnload, useDebounce, useEffectOnce, useMount, useUnmount, useUpdateEffect} from "react-use";
 import {alertError, clearAlert} from "@/lib/alerts";
 import {upsertUserSolution} from "@/lib/user-service";
+import {useSettings} from "@/providers/SettingsProvider";
 
 type Props = {
     puzzle: Puzzle;
@@ -18,6 +19,7 @@ type Props = {
 }
 
 export default function GamePanel({solution, initialUserSolution}: Props) {
+    const settings = useSettings();
     const [userSolution, setUserSolution] = useState<IUserPuzzleSolution>(initialUserSolution);
     const [userSolutionLoading, setUserSolutionLoading] = useState(false);
     const [loadedSolved, setLoadedSolved] = useState(false);
@@ -200,6 +202,11 @@ export default function GamePanel({solution, initialUserSolution}: Props) {
         setUserSolutionLoading(false);
         setLoadedSolved(userSolution.state !== "Unsolved"); // Prevents solution from being saved when it is already completed.
     }, [userSolutionLoading]);
+
+    useEffect(() => {
+        const isPlaying = userSolutionLoading || currentRowIndex > 0 || gameState !== "Unsolved";
+        settings.setCanSetIsHardMode(!isPlaying);
+    }, [settings, userSolutionLoading, currentRowIndex, gameState]);
 
     return (
         <div className="mx-auto flex w-full grow flex-col px-1 pb-8 pt-2 sm:px-6 md:max-w-7xl lg:px-8 short:pb-2 short:pt-2">
