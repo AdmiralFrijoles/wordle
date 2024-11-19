@@ -68,7 +68,7 @@ export default function Keyboard({
                 ))}
                 {(rowIndex === keyboardRowCount - 1) &&
                 <Key value="DELETE" onClick={onDelete}>
-                    <BackspaceIcon className="h-[1.3rem] w-[1.3rem] stroke-2"/>
+                    <BackspaceIcon className="h-[1.25rem] w-[1.3rem] mt-[0.1rem] stroke-2"/>
                 </Key>}
             </div>
             ))}

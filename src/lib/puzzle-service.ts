@@ -79,3 +79,20 @@ export async function getPuzzleSolution(puzzleId: string, solutionDate: Date): P
         }
     });
 }
+
+export async function getPuzzleNeighboringSolutions(puzzleId: string, solutionDate: Date): Promise<{previous: Solution | null, next: Solution | null}> {
+    const isoDate = formatISO(new UTCDate(solutionDate.getFullYear(), solutionDate.getMonth(), solutionDate.getDate()));
+
+    const previousSolution = await prisma.solution.findFirst({
+        where: { puzzleId: puzzleId, date: {lt: isoDate} }
+    });
+
+    const nextSolution = await prisma.solution.findFirst({
+        where: { puzzleId: puzzleId, date: {gt: isoDate} }
+    });
+
+    return {
+        previous: previousSolution,
+        next: nextSolution
+    }
+}
