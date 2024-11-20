@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import {ReactNode, createContext, useContext, useState, useEffect} from "react";
-import {useLocalStorage} from "react-use";
+import {useLocalStorage, useMount} from "react-use";
 
 type Props = {
     children?: ReactNode;
@@ -36,12 +36,16 @@ const SettingsContext = createContext<ContextProps>({
 });
 
 export function SettingsProvider({ children }: Props) {
-    const prefersDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const [isHardMode, setIsHardMode] = useLocalStorage<boolean>("setting-is-hard-mode", false);
+    const [isHighContrast, setIsHighContrast] = useLocalStorage<boolean>("setting-is-high-contrast", false);
+    const [isDarkMode, setIsDarkMode] = useLocalStorage<boolean>("setting-is-dark-mode", undefined);
+    const [canSetIsHardMode, setCanSetIsHardMode] = useState<boolean>(true);
 
-    const [isHardMode, setIsHardMode] = useLocalStorage("setting-is-hard-mode", false);
-    const [isHighContrast, setIsHighContrast] = useLocalStorage("setting-is-high-contrast", false);
-    const [isDarkMode, setIsDarkMode] = useLocalStorage("setting-is-dark-mode", prefersDarkMode);
-    const [canSetIsHardMode, setCanSetIsHardMode] = useState(true);
+    useMount(() => {
+        if (isDarkMode === undefined) {
+            setIsDarkMode(window.matchMedia("(prefers-color-scheme: dark)").matches);
+        }
+    })
 
     useEffect(() => {
         if (isDarkMode) {
@@ -72,7 +76,7 @@ export function SettingsProvider({ children }: Props) {
 export function useSettings() {
     const data = useContext(SettingsContext);
     if (!data) {
-        throw new Error("Settings must be provided");
+        throw new Error("Data must be provided");
     }
     return data;
 }

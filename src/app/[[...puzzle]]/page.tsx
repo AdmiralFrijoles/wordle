@@ -76,12 +76,16 @@ export default async function Page({params}: {params: Promise<{puzzle: string[]}
         neighboringSolutions.next.date.getUTCMonth(),
         neighboringSolutions.next.date.getUTCDate()) : null;
 
+
+
     return (
         <div>
             <div className="flex grow flex-col items-center justify-center pb-6 short:pb-2">
                 <div className="flex items-center justify-center">
                     <Tooltip content={puzzle.description} delay={300}  placement="bottom">
-                        <h2 className="text-lg font-semibold dark:text-white">{puzzle.title}</h2>
+                        <Link href={`/${puzzle.slug}`}>
+                            <h2 className="text-lg font-semibold dark:text-white">{puzzle.title}</h2>
+                        </Link>
                     </Tooltip>
                     {solution && <PuzzleLinkButton link={`/${puzzle.slug}/${format(date, "yyyy/MM/dd")}`}/>}
                 </div>
@@ -102,7 +106,6 @@ export default async function Page({params}: {params: Promise<{puzzle: string[]}
                         </Tooltip>
                     </div>}
                 </div>
-
             </div>
             {solution ?
                 <GamePanel puzzle={puzzle} solution={solution} initialUserSolution={userSolution}/> :

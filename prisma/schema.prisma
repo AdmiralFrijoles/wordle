@@ -127,16 +127,3 @@ enum UserSolutionState {
   WIN
   LOSS
 }
-
-type UserPuzzleId {
-  userId   String @db.ObjectId
-  puzzleId String @db.ObjectId
-}
-
-view UserPuzzleStats {
-  id              UserPuzzleId @id @map("_id")
-  puzzleTitle     String
-  winDistribution Int[]
-  wins            Int
-  losses          Int
-}

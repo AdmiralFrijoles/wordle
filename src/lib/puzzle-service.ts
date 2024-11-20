@@ -10,6 +10,13 @@ import {UTCDate} from "@date-fns/utc";
 // 6 hours
 const defaultTTL: number = 1000 * 60 * 60 * 6;
 
+export async function listPuzzlesForUser(userId: string): Promise<Puzzle[]> {
+    console.log(userId); // TODO: Filter to puzzles which the user can see
+    return prisma.puzzle.findMany({
+        where: {isPublic: true}
+    });
+}
+
 export async function getPuzzleBySlug(slug: string): Promise<Puzzle | null> {
     const cacheKey = `puzzle-by-slug-${slug}`;
     return await fetchFromCache<Puzzle>(
@@ -83,11 +90,13 @@ export async function getPuzzleNeighboringSolutions(puzzleId: string, solutionDa
     const isoDate = formatISO(new UTCDate(solutionDate.getFullYear(), solutionDate.getMonth(), solutionDate.getDate()));
 
     const previousSolution = await prisma.solution.findFirst({
-        where: { puzzleId: puzzleId, date: {lt: isoDate} }
+        where: { puzzleId: puzzleId, date: {lt: isoDate} },
+        orderBy: {date: "desc"}
     });
 
     const nextSolution = await prisma.solution.findFirst({
-        where: { puzzleId: puzzleId, date: {gt: isoDate} }
+        where: { puzzleId: puzzleId, date: {gt: isoDate} },
+        orderBy: {date: "asc"}
     });
 
     return {

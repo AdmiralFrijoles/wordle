@@ -7,10 +7,11 @@ import isValidWord from "../../lib/dictionary";
 import {REVEAL_TIME_MS} from "@/constants";
 import GameGrid from "@/components/game/grid";
 import {Puzzle, Solution} from "@prisma/client";
-import {useBeforeUnload, useDebounce, useEffectOnce, useMount, useUnmount, useUpdateEffect} from "react-use";
+import {useDebounce, useEffectOnce, useUpdateEffect} from "react-use";
 import {alertError, clearAlert} from "@/lib/alerts";
 import {upsertUserSolution} from "@/lib/user-service";
 import {useSettings} from "@/providers/SettingsProvider";
+import {useCurrentPuzzle} from "@/providers/PuzzleProvider";
 
 type Props = {
     puzzle: Puzzle;
@@ -18,7 +19,8 @@ type Props = {
     initialUserSolution: IUserPuzzleSolution;
 }
 
-export default function GamePanel({solution, initialUserSolution}: Props) {
+export default function GamePanel({puzzle, solution, initialUserSolution}: Props) {
+    const {setCurrentPuzzle, setCurrentSolution} = useCurrentPuzzle();
     const settings = useSettings();
     const [userSolution, setUserSolution] = useState<IUserPuzzleSolution>(initialUserSolution);
     const [userSolutionLoading, setUserSolutionLoading] = useState(false);
@@ -33,6 +35,11 @@ export default function GamePanel({solution, initialUserSolution}: Props) {
 
     const wordLength: number = solution.solution.length;
     const maxGuesses: number = solution.maxGuesses;
+
+    useEffect(() => {
+        setCurrentPuzzle(puzzle);
+        setCurrentSolution(solution);
+    }, [setCurrentPuzzle, setCurrentSolution, puzzle, solution]);
 
     function initRows() {
         const temp: Row[] = [];
