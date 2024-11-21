@@ -18,7 +18,7 @@ export default function ArchiveModal() {
 
     return (
         <>
-            {currentPuzzle && currentSolution && (
+            {currentPuzzle && (
                 <>
                     <HeaderIcon tooltipContent="Play Previous Words">
                         <CalendarDaysIcon className="dark:stroke-white" onClick={onOpen}/>

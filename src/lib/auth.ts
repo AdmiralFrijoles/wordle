@@ -30,7 +30,7 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
         strategy: "jwt"
     },
     providers: [Discord({
-        // Do not request email scope
-        authorization: "https://discord.com/api/oauth2/authorize?scope=identify",
+        // Do not request email scope, but do request guilds so we can check who is in the Dojo.
+        authorization: "https://discord.com/api/oauth2/authorize?scope=identify+guilds",
     })]
 })
