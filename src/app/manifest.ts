@@ -10,7 +10,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
         name: title ?? "Wordle",
         description: description ?? "",
         start_url: "/",
-        display: "minimal-ui",
+        display: "standalone",
         theme_color: "#0f172a",
         background_color: "#0f172a",
         icons: [
@@ -20,7 +20,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
                 "type": "image/x-icon"
             },
             {
-                "src": "apple-touch-icon.png",
+                "src": "/pwa/ios/icon.png",
                 "sizes": "any",
                 "type": "image/png",
                 "purpose": "any"
@@ -49,6 +49,6 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
                 "sizes": "512x512",
                 "purpose": "maskable"
             }
-        ],
+        ]
     }
 }

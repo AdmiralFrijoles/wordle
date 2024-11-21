@@ -13,10 +13,15 @@ const defaultTTL: number = 1000 * 60 * 60 * 6;
 
 export async function listPuzzlesForUser(): Promise<Puzzle[]> {
     const session = await auth();
-    if (!session) return [];
-    return prisma.puzzle.findMany({
-        where: {isPublic: true}
-    });
+    if (!session) {
+        return prisma.puzzle.findMany({
+            where: {isPublic: true}
+        });
+    } else {
+        return prisma.puzzle.findMany({
+            where: {isPublic: true} // TODO: Filter by user access
+        });
+    }
 }
 
 export async function getPuzzleBySlug(slug: string): Promise<Puzzle | null> {

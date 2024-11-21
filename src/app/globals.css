@@ -50,6 +50,14 @@ a {
   text-decoration: none;
 }
 
+.splash-screen {
+  z-index: 1000;
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  background: white;
+}
+
 .navbar {
 }
 
