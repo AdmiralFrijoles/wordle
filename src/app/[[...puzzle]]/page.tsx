@@ -13,6 +13,7 @@ import Link from "next/link";
 import {ChevronLeftIcon, ChevronRightIcon} from "@heroicons/react/16/solid";
 import { UTCDate } from "@date-fns/utc";
 import {utc} from "@date-fns/utc/utc";
+import {SetCurrentPuzzleContext, useCurrentPuzzle} from "@/providers/PuzzleProvider";
 
 function getPuzzleDateFromRoute(route: string[]): Date {
     const today = startOfToday();
@@ -62,8 +63,7 @@ export default async function Page({params}: {params: Promise<{puzzle: string[]}
     const userSolution = (solution && session?.user?.id) ?
         await getUserSolution(session?.user?.id, solution.id) ?? defaultUserSolution : defaultUserSolution;
 
-    const neighboringSolutions = solution?.id ?
-        await getPuzzleNeighboringSolutions(puzzle.id, date) :
+    const neighboringSolutions = puzzle?.id ? await getPuzzleNeighboringSolutions(puzzle.id, date) :
         {previous: null, next: null};
 
     const prevDate = neighboringSolutions.previous ? new UTCDate(
@@ -76,10 +76,9 @@ export default async function Page({params}: {params: Promise<{puzzle: string[]}
         neighboringSolutions.next.date.getUTCMonth(),
         neighboringSolutions.next.date.getUTCDate()) : null;
 
-
-
     return (
         <div>
+            <SetCurrentPuzzleContext puzzle={puzzle}/>
             <div className="flex grow flex-col items-center justify-center pb-6 short:pb-2">
                 <div className="flex items-center justify-center">
                     <Tooltip content={puzzle.description} delay={300}  placement="bottom">

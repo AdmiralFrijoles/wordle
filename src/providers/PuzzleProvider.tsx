@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import {createContext, useContext, useState} from "react";
+import {createContext, useContext, useEffect, useState} from "react";
 import {Puzzle, Solution} from "@prisma/client";
 
 type Props = {
@@ -43,4 +43,12 @@ export function useCurrentPuzzle() {
         throw new Error("Data must be provided");
     }
     return data;
+}
+
+export function SetCurrentPuzzleContext({puzzle}: { puzzle: Puzzle }) {
+    const {setCurrentPuzzle} = useCurrentPuzzle();
+    useEffect(() => {
+        setCurrentPuzzle(puzzle);
+    }, [setCurrentPuzzle, puzzle]);
+    return null;
 }

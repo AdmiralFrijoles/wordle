@@ -6,12 +6,14 @@ import {fetchFromCache} from "@/lib/cache";
 import {getAppSetting, setAppSetting} from "@/lib/settings-service";
 import {formatISO} from "date-fns";
 import {UTCDate} from "@date-fns/utc";
+import {auth} from "@/lib/auth";
 
 // 6 hours
 const defaultTTL: number = 1000 * 60 * 60 * 6;
 
-export async function listPuzzlesForUser(userId: string): Promise<Puzzle[]> {
-    console.log(userId); // TODO: Filter to puzzles which the user can see
+export async function listPuzzlesForUser(): Promise<Puzzle[]> {
+    const session = await auth();
+    if (!session) return [];
     return prisma.puzzle.findMany({
         where: {isPublic: true}
     });
