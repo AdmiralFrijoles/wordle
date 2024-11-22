@@ -1,14 +1,24 @@
-﻿import {Puzzle} from "@prisma/client";
+﻿"use client";
+
+import {Puzzle} from "@prisma/client";
 import {getPuzzleCount} from "@/lib/puzzle-service";
 import {PuzzlePieceIcon} from "@heroicons/react/24/outline";
+import {CalendarDate} from "@internationalized/date";
+import {useAsync} from "react-use";
+import {useState} from "react";
 
 type Props = {
     puzzle: Puzzle;
-    date: Date;
+    date: CalendarDate;
 }
 
-export default async function NoSolution({}: Props) {
-    const numPublicPuzzles = await getPuzzleCount(true);
+export default function NoSolution({}: Props) {
+    const [numPublicPuzzles, setNumPublicPuzzles] = useState<number>(0);
+
+    useAsync(async () => {
+        const puzzleCount = await getPuzzleCount(true);
+        setNumPublicPuzzles(puzzleCount);
+    });
 
     return (
         <div className="flex flex-col items-center justify-center">

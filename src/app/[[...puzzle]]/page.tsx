@@ -1,115 +1,251 @@
-﻿import {notFound, redirect} from "next/navigation";
-import {getDefaultPuzzle, getPuzzleBySlug, getPuzzleNeighboringSolutions, getPuzzleSolution} from "@/lib/puzzle-service";
-import {Puzzle} from "@prisma/client";
-import {startOfToday, format, compareDesc} from "date-fns";
-import NoSolution from "@/app/[[...puzzle]]/no-solution";
-import GamePanel from "@/components/game";
-import {auth} from "@/lib/auth";
-import {getUserSolution} from "@/lib/user-service";
-import { Tooltip } from "@nextui-org/react";
-import PuzzleLinkButton from "@/components/PuzzleLinkButton";
-import {IUserPuzzleSolution} from "@/types";
-import Link from "next/link";
-import {ChevronLeftIcon, ChevronRightIcon} from "@heroicons/react/16/solid";
-import { UTCDate } from "@date-fns/utc";
-import {utc} from "@date-fns/utc/utc";
-import {SetCurrentPuzzleContext} from "@/providers/PuzzleProvider";
+﻿"use client";
 
-function getPuzzleDateFromRoute(route: string[]): Date {
-    const today = startOfToday();
-    if (route && route.length >= 4) {
-        const year = parseInt(route[1]);
-        const month = parseInt(route[2]);
-        const day = parseInt(route[3]);
+import {CalendarDate, DateFormatter, getLocalTimeZone, today} from "@internationalized/date";
+import {notFound, usePathname, useRouter} from "next/navigation";
+import {useCurrentPuzzle} from "@/providers/PuzzleProvider";
+import {useAsync, useMountedState} from "react-use";
+import {useState} from "react";
+import {PuzzlePageSkeleton} from "@/app/[[...puzzle]]/_components/skeleton";
+import {
+    getDefaultPuzzleSlug,
+    getPuzzleBySlug,
+    getPuzzleNeighboringSolutions,
+    getPuzzleSolution
+} from "@/lib/puzzle-service";
+import {asDateOnly} from "@/lib/date-util";
+import NoSolution from "@/app/[[...puzzle]]/no-solution";
+import { useSession } from "next-auth/react"
+import {getUserSolution} from "@/lib/user-service";
+import {IUserPuzzleSolution} from "@/types";
+import {Tooltip} from "@nextui-org/react";
+import Link from "next/link";
+import PuzzleLinkButton from "@/components/PuzzleLinkButton";
+import {format} from "date-fns";
+import {ChevronLeftIcon, ChevronRightIcon} from "@heroicons/react/16/solid";
+import GamePanel from "@/components/game";
+
+function parseDateParts(parts: string[]): CalendarDate | null {
+    if (parts && parts.length === 3) {
+        const year = parseInt(parts[0]);
+        const month = parseInt(parts[1]);
+        const day = parseInt(parts[2]);
 
         if (year && month && day) {
-            return new Date(year, month - 1, day);
+            return new CalendarDate(year, month, day);
         }
     }
-    return today;
+    return null;
 }
 
-export default async function Page({params}: {params: Promise<{puzzle: string[]}>}) {
-    const session = await auth();
-    const routeParams = (await params).puzzle;
-    const slug: string | null = routeParams && routeParams.length > 0 ? routeParams[0] : null;
-    const date: Date = getPuzzleDateFromRoute(routeParams);
-    const today = startOfToday();
+type PathProps = {
+    puzzleSlug: string | null;
+    date: CalendarDate | null;
+}
 
-    let puzzle: Puzzle | null | undefined;
-    if (!slug) {
-        puzzle = await getDefaultPuzzle();
-    } else {
-        puzzle = await getPuzzleBySlug(slug)
+const defaultPathProps: PathProps = {
+    puzzleSlug: null,
+    date: null
+};
+
+function parsePathString(path: string): PathProps {
+    if (!path) return defaultPathProps;
+
+    const routeParams = path.split("/").slice(1);
+    if (!routeParams || routeParams.length === 0) return defaultPathProps;
+
+    const puzzleSlug: string | null = routeParams[0];
+    const date: CalendarDate | null = parseDateParts(routeParams.slice(1));
+
+    return {
+        puzzleSlug,
+        date
+    };
+}
+
+
+export default function Page() {
+    const { data: session } = useSession();
+    const router = useRouter();
+    const isMounted = useMountedState();
+    const userTimeZone = getLocalTimeZone();
+    const userLocale = (new Intl.NumberFormat()).resolvedOptions().locale;
+    const localToday = today(userTimeZone);
+    const currentPath = usePathname();
+    const {puzzleSlug: puzzleSlugFromRoute, date: dateFromRoute} = parsePathString(currentPath);
+    const {
+        currentPuzzle, setCurrentPuzzle,
+        currentSolution, setCurrentSolution,
+        currentUserSolution, setCurrentUserSolution
+    } = useCurrentPuzzle();
+    const [isLoading, setIsLoading] = useState(true);
+    const selectedDate = dateFromRoute ? dateFromRoute : localToday;
+    const [previousPuzzleDate, setPreviousPuzzleDate] = useState<CalendarDate | null>(null);
+    const [nextPuzzleDate, setNextPuzzleDate] = useState<CalendarDate | null>(null);
+    const dateFormatter = new DateFormatter(userLocale, {dateStyle: "full"});
+
+    function clearSolution() {
+        setCurrentSolution(null);
+        setCurrentUserSolution(null);
     }
-    if (!puzzle) {
-        return notFound();
+
+    function clearPuzzle() {
+        setCurrentPuzzle(null);
+        clearSolution();
     }
 
-    // If the date from the route is in the future (relative to the user's timezone), redirect to the default solution.
-    if (compareDesc(today, date) === 1) {
-        return redirect(`/${slug}`);
-    }
+    useAsync(async () => {
+        async function loadPuzzle() {
+            try {
+                let puzzleSlug = puzzleSlugFromRoute;
+                if (!puzzleSlug) {
+                    puzzleSlug = await getDefaultPuzzleSlug();
+                }
 
-    const solution = await getPuzzleSolution(puzzle.id, date);
+                if (!puzzleSlug) {
+                    clearPuzzle();
+                    return null;
+                }
 
-    const defaultUserSolution = {
-        solutionId: solution?.id,
-        userId: session?.user?.id,
-        guesses: [],
-        state: "Unsolved"
-    } as IUserPuzzleSolution;
+                const puzzle = await getPuzzleBySlug(puzzleSlug);
+                setCurrentPuzzle(puzzle);
 
-    const userSolution = (solution && session?.user?.id) ?
-        await getUserSolution(session?.user?.id, solution.id) ?? defaultUserSolution : defaultUserSolution;
+                if (!puzzle) {
+                    clearPuzzle();
+                    return null;
+                }
 
-    const neighboringSolutions = puzzle?.id ? await getPuzzleNeighboringSolutions(puzzle.id, date) :
-        {previous: null, next: null};
+                return puzzle;
+            } catch (e) {
+                console.error(e);
+                clearPuzzle();
+                return null;
+            }
+        }
 
-    const prevDate = neighboringSolutions.previous ? new UTCDate(
-        neighboringSolutions.previous.date.getUTCFullYear(),
-        neighboringSolutions.previous.date.getUTCMonth(),
-        neighboringSolutions.previous.date.getUTCDate()) : null;
+        async function loadSolution(puzzleId: string, date: CalendarDate) {
+            try {
+                const solution = await getPuzzleSolution(puzzleId, asDateOnly(date));
+                if (!solution) {
+                    clearSolution();
+                    return null;
+                }
+                setCurrentSolution(solution);
+                return solution;
+            } catch(e) {
+                console.error(e);
+                clearSolution();
+                return null;
+            }
+        }
 
-    const nextDate = neighboringSolutions.next ? new UTCDate(
-        neighboringSolutions.next.date.getUTCFullYear(),
-        neighboringSolutions.next.date.getUTCMonth(),
-        neighboringSolutions.next.date.getUTCDate()) : null;
+        async function loadUserSolution(solutionId: string, userId: string | null | undefined) {
+            const defaultUserSolution = {
+                solutionId: solutionId,
+                userId: userId,
+                guesses: [],
+                state: "Unsolved",
+                hardMode: false
+            } as IUserPuzzleSolution;
+
+            try {
+                const userSolution = (solution && userId) ?
+                    await getUserSolution(userId, solutionId) ?? defaultUserSolution : defaultUserSolution;
+                setCurrentUserSolution(userSolution);
+                return userSolution;
+            }
+            catch (e) {
+                console.error(e);
+                setCurrentUserSolution(defaultUserSolution);
+                return defaultUserSolution;
+            }
+
+        }
+
+        if (!isLoading || !isMounted) return;
+
+        const puzzle = await loadPuzzle();
+
+        if (!puzzle) {
+            setIsLoading(false);
+            return;
+        }
+
+        // Disallow playing tomorrow's game today.
+        if (selectedDate.compare(localToday) > 0) {
+            router.replace(`/${puzzle.slug}`);
+            return;
+        }
+
+        const solution = await loadSolution(puzzle.id, selectedDate);
+        if (!solution) {
+            setIsLoading(false);
+            return;
+        }
+
+        await loadUserSolution(solution.id, session?.user?.id);
+
+        const neighboringSolutions = puzzle?.id ?
+            await getPuzzleNeighboringSolutions(puzzle.id, asDateOnly(selectedDate)) :
+            {previous: null, next: null};
+
+        const prevDate = neighboringSolutions.previous ? new CalendarDate(
+            neighboringSolutions.previous.date.getUTCFullYear(),
+            neighboringSolutions.previous.date.getUTCMonth() + 1,
+            neighboringSolutions.previous.date.getUTCDate()) : null;
+        setPreviousPuzzleDate(prevDate);
+
+        const nextDate = neighboringSolutions.next ? new CalendarDate(
+            neighboringSolutions.next.date.getUTCFullYear(),
+            neighboringSolutions.next.date.getUTCMonth() + 1,
+            neighboringSolutions.next.date.getUTCDate()) : null;
+        setNextPuzzleDate(nextDate);
+
+        setIsLoading(false);
+    }, [isLoading]);
+
+    if (isLoading) return <PuzzlePageSkeleton/>;
+    if (!currentPuzzle) return notFound();
+    if (!currentSolution) return <NoSolution puzzle={currentPuzzle} date={selectedDate}/>
 
     return (
         <div>
-            <SetCurrentPuzzleContext puzzle={puzzle}/>
             <div className="flex grow flex-col items-center justify-center">
                 <div className="flex items-center justify-center">
-                    <Tooltip content={puzzle.description} delay={300}  placement="bottom">
-                        <Link href={`/${puzzle.slug}`}>
-                            <h2 className="text-lg font-semibold dark:text-white">{puzzle.title}</h2>
+                    <Tooltip content={currentPuzzle.description} delay={300} placement="bottom">
+                        <Link href={`/${currentPuzzle.slug}`}>
+                            <h2 className="text-lg font-semibold dark:text-white">{currentPuzzle.title}</h2>
                         </Link>
                     </Tooltip>
-                    {solution && <PuzzleLinkButton link={`/${puzzle.slug}/${format(date, "yyyy/MM/dd")}`}/>}
+                    {currentSolution && <PuzzleLinkButton
+                        link={`/${currentPuzzle.slug}/${format(selectedDate.toDate(userTimeZone), "yyyy/MM/dd")}`}/>}
                 </div>
                 <div className="flex tems-center justify-center">
-                    {prevDate && <div className="flex flex-1 justify-start">
-                        <Tooltip delay={500} content={(<p className="text-center">Previous Solution<br/>{format(prevDate, "PPPP", {in: utc})}</p>)}>
-                            <Link href={`/${puzzle.slug}/${format(prevDate, "yyyy/MM/dd")}`}>
+                    {previousPuzzleDate && <div className="flex flex-1 justify-start">
+                        <Tooltip delay={500} content={(<p className="text-center">Previous
+                            Solution<br/>{dateFormatter.format(previousPuzzleDate.toDate(userTimeZone))}</p>)}>
+                            <Link
+                                href={`/${currentPuzzle.slug}/${format(previousPuzzleDate.toDate(userTimeZone), "yyyy/MM/dd")}`}>
                                 <ChevronLeftIcon className="w-5"/>
                             </Link>
                         </Tooltip>
                     </div>}
-                    <h3 className="flex grow justify-center px-2 text-sm dark:text-white">{format(date, "PPPP", {in: utc})}</h3>
-                    {nextDate && <div className="flex flex-1 justify-end">
-                        <Tooltip delay={500} content={(<p className="text-center">Next Solution<br/>{format(nextDate, "PPPP")}</p>)}>
-                        <Link href={`/${puzzle.slug}/${format(nextDate, "yyyy/MM/dd")}`}>
+                    <h3 className="flex grow justify-center px-2 text-sm dark:text-white">{dateFormatter.format(selectedDate.toDate(userTimeZone))}</h3>
+                    {nextPuzzleDate && <div className="flex flex-1 justify-end">
+                        <Tooltip delay={500} content={(<p className="text-center">Next
+                            Solution<br/>{dateFormatter.format(nextPuzzleDate.toDate(userTimeZone))}</p>)}>
+                            <Link
+                                href={`/${currentPuzzle.slug}/${format(nextPuzzleDate.toDate(userTimeZone), "yyyy/MM/dd")}`}>
                                 <ChevronRightIcon className="w-5"/>
                             </Link>
                         </Tooltip>
                     </div>}
                 </div>
             </div>
-            {solution ?
-                <GamePanel puzzle={puzzle} solution={solution} initialUserSolution={userSolution}/> :
-                <NoSolution puzzle={puzzle} date={date}/>
-            }
+            {currentUserSolution && <GamePanel
+                puzzle={currentPuzzle}
+                solution={currentSolution}
+                initialUserSolution={currentUserSolution}
+            />}
         </div>
-    )
+    );
 }

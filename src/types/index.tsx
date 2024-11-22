@@ -40,3 +40,9 @@ export type PuzzleStats = {
     totalGames: number;
     successRate: number;
 }
+
+export type DateOnly = {
+    year: number;
+    month: number;
+    day: number;
+}

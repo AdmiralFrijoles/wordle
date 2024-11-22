@@ -7,6 +7,9 @@ import {getAppSetting, setAppSetting} from "@/lib/settings-service";
 import {formatISO} from "date-fns";
 import {UTCDate} from "@date-fns/utc";
 import {auth} from "@/lib/auth";
+import {CalendarDate} from "@internationalized/date";
+import {DateOnly} from "@/types";
+import {SETTING_DEFAULT_PUZZLE} from "@/constants/settings";
 
 // 6 hours
 const defaultTTL: number = 1000 * 60 * 60 * 6;
@@ -64,7 +67,7 @@ export async function getRandomPublicPuzzle(): Promise<Puzzle | null> {
 }
 
 export async function getDefaultPuzzleSlug(): Promise<string | null> {
-    const defaultPuzzleSlug = await getAppSetting<string>("DEFAULT_PUZZLE_SLUG");
+    const defaultPuzzleSlug = await getAppSetting<string>(SETTING_DEFAULT_PUZZLE);
     if (defaultPuzzleSlug) {
         return defaultPuzzleSlug;
     }
@@ -91,21 +94,29 @@ export async function getDefaultPuzzle(): Promise<Puzzle | null> {
     return null;
 }
 
-export async function getPuzzleSolution(puzzleId: string, solutionDate: Date): Promise<Solution | null> {
-    const isoDate = formatISO(new UTCDate(solutionDate.getFullYear(), solutionDate.getMonth(), solutionDate.getDate()));
-    return prisma.solution.findUnique({
-        where: {
-            puzzleId_date: {
-                puzzleId: puzzleId,
-                date: isoDate
+export async function getPuzzleSolution(puzzleId: string, solutionDate: DateOnly | null): Promise<Solution | null> {
+    if (solutionDate) {
+        const isoDate = formatISO(new UTCDate(solutionDate.year, solutionDate.month, solutionDate.day));
+        return prisma.solution.findUnique({
+            where: {
+                puzzleId_date: {
+                    puzzleId: puzzleId,
+                    date: isoDate
+                }
             }
-        }
-    });
+        });
+    } else {
+        return prisma.solution.findFirst({
+            where: {
+                puzzleId: puzzleId
+            },
+            orderBy: {date: "desc"}
+        })
+    }
 }
 
-export async function getPuzzleNeighboringSolutions(puzzleId: string, solutionDate: Date): Promise<{previous: Solution | null, next: Solution | null}> {
-    const isoDate = formatISO(new UTCDate(solutionDate.getFullYear(), solutionDate.getMonth(), solutionDate.getDate()));
-
+export async function getPuzzleNeighboringSolutions(puzzleId: string, solutionDate: DateOnly): Promise<{previous: Solution | null, next: Solution | null}> {
+    const isoDate = formatISO(new UTCDate(solutionDate.year, solutionDate.month, solutionDate.day));
     const previousSolution = await prisma.solution.findFirst({
         where: { puzzleId: puzzleId, date: {lt: isoDate} },
         orderBy: {date: "desc"}

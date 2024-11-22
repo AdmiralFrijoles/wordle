@@ -1,19 +1,19 @@
 ﻿import React from "react";
 import {NextUIProvider} from "@nextui-org/react";
 import {SettingsProvider} from "@/providers/SettingsProvider";
-import {Provider as AtomProvider} from "jotai";
 import {CurrentPuzzleProvider} from "@/providers/PuzzleProvider";
+import {SessionProvider} from "next-auth/react";
 
 export function Providers({children}: {children: React.ReactNode}) {
     return (
         <NextUIProvider>
-        <AtomProvider>
+        <SessionProvider>
         <CurrentPuzzleProvider>
         <SettingsProvider>
             {children}
         </SettingsProvider>
         </CurrentPuzzleProvider>
-        </AtomProvider>
+        </SessionProvider>
         </NextUIProvider>
     )
 }
