@@ -22,9 +22,9 @@ export default function BaseModal({
                placement="center"
                backdrop="blur"
                classNames={{
-                   body: "p-0 mt-2",
+                   body: "p-0 mt-1",
                    base: "rounded-lg bg-white px-4 pt-5 pb-4 text-left align-bottom shadow-xl transition-all dark:bg-gray-800 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:align-middle",
-                   header: "text-center text-lg font-medium leading-6 text-gray-900 dark:text-gray-100 pt-0 pb-2",
+                   header: "text-center text-lg font-medium leading-6 text-gray-900 dark:text-gray-100 pt-0 pb-1",
                }}
                closeButton={(
                    <button tabIndex={0} aria-pressed="false" className="absolute right-4 top-4">

@@ -2,6 +2,7 @@
 
 import {createContext, useContext, useEffect, useState} from "react";
 import {Puzzle, Solution} from "@prisma/client";
+import {IUserPuzzleSolution} from "@/types";
 
 type Props = {
     children: React.ReactNode
@@ -13,6 +14,9 @@ type ContextProps = {
 
     currentSolution: Solution | null;
     setCurrentSolution: (solution: Solution | null) => void;
+
+    currentUserSolution: IUserPuzzleSolution | null;
+    setCurrentUserSolution: (solution: IUserPuzzleSolution | null) => void;
 }
 
 const PuzzleContext = createContext<ContextProps>({
@@ -21,16 +25,21 @@ const PuzzleContext = createContext<ContextProps>({
 
     currentSolution: null,
     setCurrentSolution: () => {},
+
+    currentUserSolution: null,
+    setCurrentUserSolution: () => {},
 });
 
 export function CurrentPuzzleProvider({children}: Props) {
     const [currentPuzzle, setCurrentPuzzle] = useState<Puzzle | null>(null);
     const [currentSolution, setCurrentSolution] = useState<Solution | null>(null);
+    const [currentUserSolution, setCurrentUserSolution] = useState<IUserPuzzleSolution | null>(null);
 
     return (
         <PuzzleContext.Provider value={{
             currentPuzzle, setCurrentPuzzle,
-            currentSolution, setCurrentSolution
+            currentSolution, setCurrentSolution,
+            currentUserSolution, setCurrentUserSolution
         }}>
             {children}
         </PuzzleContext.Provider>

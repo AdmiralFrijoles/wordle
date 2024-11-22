@@ -7,11 +7,12 @@ import isValidWord from "../../lib/dictionary";
 import {REVEAL_TIME_MS} from "@/constants";
 import GameGrid from "@/components/game/grid";
 import {Puzzle, Solution} from "@prisma/client";
-import {useDebounce, useEffectOnce, useUpdateEffect} from "react-use";
+import {useDebounce, useEffectOnce, useUnmount, useUpdateEffect} from "react-use";
 import {alertError, clearAlert} from "@/lib/alerts";
 import {upsertUserSolution} from "@/lib/user-service";
 import {useSettings} from "@/providers/SettingsProvider";
 import {useCurrentPuzzle} from "@/providers/PuzzleProvider";
+import {getGuessRows} from "@/lib/guesses";
 
 type Props = {
     puzzle: Puzzle;
@@ -20,7 +21,7 @@ type Props = {
 }
 
 export default function GamePanel({puzzle, solution, initialUserSolution}: Props) {
-    const {setCurrentPuzzle, setCurrentSolution} = useCurrentPuzzle();
+    const {setCurrentPuzzle, setCurrentSolution, setCurrentUserSolution} = useCurrentPuzzle();
     const settings = useSettings();
     const [userSolution, setUserSolution] = useState<IUserPuzzleSolution>(initialUserSolution);
     const [userSolutionLoading, setUserSolutionLoading] = useState(false);
@@ -40,21 +41,6 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
         setCurrentPuzzle(puzzle);
         setCurrentSolution(solution);
     }, [setCurrentPuzzle, setCurrentSolution, puzzle, solution]);
-
-    function initRows() {
-        const temp: Row[] = [];
-        for (let i = 0; i < maxGuesses; i++) {
-            const tempRow: Row = [];
-            for (let j = 0; j < wordLength; j++) {
-                tempRow.push({
-                    value: "",
-                    status: "Guessing",
-                });
-            }
-            temp.push(tempRow);
-        }
-        return temp;
-    }
 
     function handleLetterClick(letter: string) {
         if (gameState !== "Unsolved") return;
@@ -159,6 +145,7 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
     }, 100, [gameState, currentRowIndex]);
 
     useUpdateEffect(() => {
+        setCurrentUserSolution(userSolution);
         async function saveUserSolution() {
             // Don't save state if the user hasn't started playing.
             if (userSolutionLoading || !userSolution || currentRowIndex <= 0) return;
@@ -186,23 +173,7 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
 
     useUpdateEffect(() => {
         if (!userSolutionLoading) return;
-
-        const tempRows = initRows();
-        const numRows = Math.min(userSolution.guesses.length, maxGuesses);
-        for (let r = 0; r < numRows; r++) {
-            const numChars = Math.min(userSolution.guesses[r].length, wordLength);
-            for (let c = 0; c < numChars; c++) {
-                const letter = userSolution.guesses[r][c];
-                tempRows[r][c].value = letter;
-                if (solution.solution[c].toLocaleUpperCase() === letter.toLocaleUpperCase())
-                    tempRows[r][c].status = "Correct";
-                else if (solution.solution.toLocaleUpperCase().includes(letter.toLocaleUpperCase()))
-                    tempRows[r][c].status = "Present";
-                else
-                    tempRows[r][c].status = "Absent";
-            }
-        }
-
+        const tempRows = getGuessRows(solution.solution, userSolution, maxGuesses, wordLength);
         setCurrentRowIndex(userSolution.guesses.length);
         setGameState(userSolution.state);
         setRows(tempRows);
@@ -214,6 +185,10 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
         const isPlaying = userSolutionLoading || currentRowIndex > 0 || gameState !== "Unsolved";
         settings.setCanSetIsHardMode(!isPlaying);
     }, [settings, userSolutionLoading, currentRowIndex, gameState]);
+
+    useUnmount(() => {
+        setCurrentUserSolution(null);
+    })
 
     return (
         <div className="mx-auto flex w-full grow flex-col px-1 pb-8 pt-2 sm:px-6 md:max-w-7xl lg:px-8 short:pb-2 short:pt-2">

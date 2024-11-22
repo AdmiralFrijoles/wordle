@@ -1,4 +1,6 @@
-﻿export enum GameStates {
+﻿import {Puzzle} from "@prisma/client";
+
+export enum GameStates {
     Unsolved = 0,
     Win = 1,
     Loss = 2
@@ -26,4 +28,14 @@ export interface IUserPuzzleSolution {
     solutionId: string;
     state: keyof typeof GameStates;
     guesses: string[];
+}
+
+export type PuzzleStats = {
+    puzzle: Puzzle;
+    winDistribution: number[];
+    gamesFailed: number;
+    currentStreak: number;
+    bestStreak: number;
+    totalGames: number;
+    successRate: number;
 }

@@ -10,7 +10,7 @@ import { SETTING_APP_TITLE } from "@/constants/settings";
 import Link from "next/link";
 
 export default async function Header() {
-    const headerTitle = await getAppSetting<string>(SETTING_APP_TITLE);
+    const headerTitle = await getAppSetting<string>(SETTING_APP_TITLE) ?? "Wordle";
     const puzzleCount = await getPuzzleCount();
 
     return (
@@ -25,7 +25,7 @@ export default async function Header() {
                         {headerTitle}
                     </Link>
                 <div className="flex-1 flex justify-end ml-auto space-x-2">
-                    <RankingModal/>
+                    <RankingModal appTitle={headerTitle}/>
                     <CurrentUser/>
                     <SettingsModal/>
                 </div>
