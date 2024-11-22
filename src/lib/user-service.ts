@@ -36,7 +36,8 @@ function toUserPuzzleSolution(userSolution: UserSolution): IUserPuzzleSolution {
         userId: userSolution.userId,
         solutionId: userSolution.solutionId,
         guesses: userSolution.guesses,
-        state: toGameState(userSolution.state)
+        state: toGameState(userSolution.state),
+        hardMode: userSolution.hardMode
     } as IUserPuzzleSolution;
 }
 
@@ -77,13 +78,15 @@ export async function upsertUserSolution(userSolution: IUserPuzzleSolution): Pro
             },
             update: {
                 guesses: userSolution.guesses,
-                state: fromGameState(userSolution.state)
+                state: fromGameState(userSolution.state),
+                hardMode: userSolution.hardMode
             },
             create: {
                 userId: userSolution.userId,
                 solutionId: userSolution.solutionId,
                 guesses: userSolution.guesses,
-                state: fromGameState(userSolution.state)
+                state: fromGameState(userSolution.state),
+                hardMode: userSolution.hardMode
             }
         });
     } else {
@@ -114,6 +117,12 @@ export async function upsertUserSolution(userSolution: IUserPuzzleSolution): Pro
                 return;
             }
 
+            if (existingSolution.hardMode && !userSolution.hardMode) {
+                console.log("Cannot disable hard mode once started.")
+            } else {
+                existingSolution.hardMode = userSolution.hardMode;
+            }
+
             existingSolution.state = fromGameState(userSolution.state);
 
             // User can only add new guesses, not modify old ones.
@@ -127,7 +136,8 @@ export async function upsertUserSolution(userSolution: IUserPuzzleSolution): Pro
                 where: {id: existingSolution.id},
                 data: {
                     guesses: existingSolution.guesses,
-                    state: existingSolution.state
+                    state: existingSolution.state,
+                    hardMode: existingSolution.hardMode
                 }
             });
         }

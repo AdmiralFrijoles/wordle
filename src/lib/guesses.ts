@@ -1,4 +1,5 @@
-﻿import {IUserPuzzleSolution, Row} from "@/types";
+﻿import {CharStatus, IUserPuzzleSolution, Row} from "@/types";
+import GraphemeSplitter from "grapheme-splitter";
 
 export function initRows(
     maxGuesses: number,
@@ -40,4 +41,50 @@ export function getGuessRows(
         }
     }
     return tempRows;
+}
+
+export function findFirstUnusedReveal(
+    currentGuess: string,
+    solution: string,
+    userSolution: IUserPuzzleSolution
+) {
+    if (userSolution.guesses.length === 0) {
+        return false
+    }
+
+    const lettersLeftArray = new Array<string>()
+    const lastGuess = userSolution.guesses[userSolution.guesses.length - 1]
+    const guessRows = getGuessRows(solution, userSolution, userSolution.guesses.length, solution.length);
+    const statuses = guessRows[userSolution.guesses.length - 1].map((cell) => cell.status);
+
+    const splitCurrentGuess = unicodeSplit(currentGuess)
+    const splitLastGuess = unicodeSplit(lastGuess)
+
+    for (let i = 0; i < splitLastGuess.length; i++) {
+        if (statuses[i] === 'Correct' || statuses[i] === 'Present') {
+            lettersLeftArray.push(splitLastGuess[i])
+        }
+        if (statuses[i] === 'Correct' && splitCurrentGuess[i] !== splitLastGuess[i]) {
+            return `Must use ${splitLastGuess[i]} in position ${i + 1}`;
+        }
+    }
+
+    // check for the first unused letter, taking duplicate letters
+    // into account - see issue #198
+    let n
+    for (const letter of splitCurrentGuess) {
+        n = lettersLeftArray.indexOf(letter)
+        if (n !== -1) {
+            lettersLeftArray.splice(n, 1)
+        }
+    }
+
+    if (lettersLeftArray.length > 0) {
+        return `Guess must contain ${lettersLeftArray[0]}`;
+    }
+    return false
+}
+
+export function unicodeSplit (word: string) {
+    return new GraphemeSplitter().splitGraphemes(word)
 }

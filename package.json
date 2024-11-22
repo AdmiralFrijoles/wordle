@@ -26,6 +26,7 @@
     "classnames": "^2.5.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^11.11.17",
+    "grapheme-splitter": "^1.0.4",
     "jotai": "^2.10.2",
     "keyv": "^5.2.1",
     "motion": "^11.11.17",

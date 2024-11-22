@@ -8,7 +8,7 @@ type Props = {
     status?: CharStatus;
     position?: number;
     isRevealing?: boolean;
-    isCompleted?: boolean
+    isCompleted?: boolean;
 };
 
 export default function GameGridCell({value, status, position = 0, isRevealing, isCompleted}: Props) {

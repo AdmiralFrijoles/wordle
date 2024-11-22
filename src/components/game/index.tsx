@@ -12,7 +12,8 @@ import {alertError, clearAlert} from "@/lib/alerts";
 import {upsertUserSolution} from "@/lib/user-service";
 import {useSettings} from "@/providers/SettingsProvider";
 import {useCurrentPuzzle} from "@/providers/PuzzleProvider";
-import {getGuessRows} from "@/lib/guesses";
+import {findFirstUnusedReveal, getGuessRows} from "@/lib/guesses";
+import {Tooltip} from "@nextui-org/tooltip";
 
 type Props = {
     puzzle: Puzzle;
@@ -33,6 +34,12 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
     const [isRevealing, setIsRevealing] = useState(false)
     const [alertId, setAlertId] = useState<string | undefined>();
     const timer = useRef<NodeJS.Timeout>();
+    const [currentRowClass, setCurrentRowClass] = useState("");
+    const [isUsingHardMode, setIsUsingHardMode] = useState(false);
+
+    function clearCurrentRowClass () {
+        setCurrentRowClass("")
+    }
 
     const wordLength: number = solution.solution.length;
     const maxGuesses: number = solution.maxGuesses;
@@ -65,14 +72,30 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
         if (gameState !== "Unsolved") return;
 
         clearAlert(alertId);
+        clearCurrentRowClass();
         if (text.length !== wordLength) {
+            setCurrentRowClass('jiggle');
+            setTimeout(() => clearCurrentRowClass(), 1000);
             setAlertId(alertError("Not enough letters", 1500));
             return;
         }
         const isSolution = solution.solution.toLocaleUpperCase() === text.toLocaleUpperCase();
         if (!isValidWord(text) && !isSolution) {
+            setCurrentRowClass('jiggle');
+            setTimeout(() => clearCurrentRowClass(), 1000);
             setAlertId(alertError("Not in word list", 1500));
             return;
+        }
+
+        if (settings.isHardMode || isUsingHardMode) {
+            setIsUsingHardMode(true);
+            const firstMissingReveal = findFirstUnusedReveal(text, solution.solution, userSolution);
+            if (firstMissingReveal) {
+                setCurrentRowClass('jiggle');
+                setTimeout(() => clearCurrentRowClass(), 1000);
+                setAlertId(alertError(firstMissingReveal, 1500));
+                return;
+            }
         }
 
         setIsRevealing(true)
@@ -140,9 +163,10 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
         setUserSolution({
             ...userSolution,
             guesses: getGuesses(),
-            state: gameState
+            state: gameState,
+            hardMode: isUsingHardMode
         } as IUserPuzzleSolution)
-    }, 100, [gameState, currentRowIndex]);
+    }, 100, [gameState, currentRowIndex, isUsingHardMode]);
 
     useUpdateEffect(() => {
         setCurrentUserSolution(userSolution);
@@ -154,10 +178,8 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
             if (loadedSolved) return;
 
             if (userSolution.userId) {
-                console.log("SAVE USER SOLUTION: DB", userSolution);
                 await upsertUserSolution(userSolution!);
             } else {
-                console.log("SAVE USER SOLUTION: LOCAL STORAGE", userSolution);
                 localStorage.setItem(`user-solution-${userSolution.solutionId}`, JSON.stringify(userSolution));
             }
 
@@ -178,6 +200,7 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
         setGameState(userSolution.state);
         setRows(tempRows);
         setUserSolutionLoading(false);
+        setIsUsingHardMode(userSolution.hardMode);
         setLoadedSolved(userSolution.state !== "Unsolved"); // Prevents solution from being saved when it is already completed.
     }, [userSolutionLoading]);
 
@@ -191,11 +214,18 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
     })
 
     return (
-        <div className="mx-auto flex w-full grow flex-col px-1 pb-8 pt-2 sm:px-6 md:max-w-7xl lg:px-8 short:pb-2 short:pt-2">
+        <div
+            className="mx-auto flex w-full grow flex-col px-1 pb-8sm:px-6 md:max-w-7xl lg:px-8 short:pb-2 pt-4 short:pt-2">
+            <div className="flex grow flex-col items-center justify-center pt-0 pb-4 short:pb-2">
+                {(isUsingHardMode || settings.isHardMode) && <Tooltip content="Any revealed hints must be used in subsequent guesses">
+                    <p className="text-sm text-amber-400">Hard Mode Enabled</p>
+                </Tooltip>}
+            </div>
             <GameGrid
                 rows={rows}
                 isRevealing={isRevealing}
                 currentRowIndex={currentRowIndex}
+                currentRowClassName={currentRowClass}
             />
             <Keyboard
                 onLetterClick={handleLetterClick}

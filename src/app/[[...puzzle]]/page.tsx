@@ -79,7 +79,7 @@ export default async function Page({params}: {params: Promise<{puzzle: string[]}
     return (
         <div>
             <SetCurrentPuzzleContext puzzle={puzzle}/>
-            <div className="flex grow flex-col items-center justify-center pb-6 short:pb-2">
+            <div className="flex grow flex-col items-center justify-center">
                 <div className="flex items-center justify-center">
                     <Tooltip content={puzzle.description} delay={300}  placement="bottom">
                         <Link href={`/${puzzle.slug}`}>

@@ -28,6 +28,7 @@ export interface IUserPuzzleSolution {
     solutionId: string;
     state: keyof typeof GameStates;
     guesses: string[];
+    hardMode: boolean;
 }
 
 export type PuzzleStats = {

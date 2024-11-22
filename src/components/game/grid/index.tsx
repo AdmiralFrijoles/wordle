@@ -5,25 +5,30 @@ type Props = {
     rows: Row[];
     isRevealing?: boolean;
     currentRowIndex: number;
+    currentRowClassName: string;
 };
 
-export default function GameGrid({rows, isRevealing, currentRowIndex}: Props) {
+export default function GameGrid({rows, isRevealing, currentRowIndex, currentRowClassName}: Props) {
     return (
         <div className="flex grow flex-col justify-center pb-6 short:pb-2">
-            {rows.map((play, rowIndex) => (
-                <div key={rowIndex} className="mb-1 flex justify-center">
-                    {play.map((guess, idx) => (
-                        <GameGridCell
-                            key={idx}
-                            value={guess.value}
-                            status={guess.status}
-                            position={idx}
-                            isRevealing={isRevealing && rowIndex === currentRowIndex - 1}
-                            isCompleted={play.every(c => c.status !== "Guessing")}
-                        />
-                    ))}
-                </div>
-            ))}
+            {rows.map((play, rowIndex) => {
+                const classes = `flex justify-center mb-1 ${currentRowIndex === rowIndex ? currentRowClassName : ""}`;
+                return (
+                    <div key={rowIndex} className={classes}>
+                        {play.map((guess, idx) => (
+                            <GameGridCell
+                                key={idx}
+                                value={guess.value}
+                                status={guess.status}
+                                position={idx}
+                                isRevealing={isRevealing && rowIndex === currentRowIndex - 1}
+                                isCompleted={play.every(c => c.status !== "Guessing")}
+                            />
+                        ))}
+                    </div>
+                );
+                }
+            )}
         </div>
     )
 }
