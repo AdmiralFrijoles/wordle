@@ -24,6 +24,16 @@ export async function listPuzzlesForUser(): Promise<Puzzle[]> {
     }
 }
 
+export async function listDatesForPuzzle(puzzleId: string): Promise<Date[]> {
+    const results = await prisma.solution.findMany({
+        where: {puzzleId: puzzleId},
+        select: {date: true},
+        orderBy: {date: "asc"}
+    });
+
+    return results.map(result => result.date);
+}
+
 export async function getPuzzleBySlug(slug: string): Promise<Puzzle | null> {
     const cacheKey = `puzzle-by-slug-${slug}`;
     return await fetchFromCache<Puzzle>(

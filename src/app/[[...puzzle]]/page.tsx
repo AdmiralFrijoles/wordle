@@ -13,7 +13,7 @@ import Link from "next/link";
 import {ChevronLeftIcon, ChevronRightIcon} from "@heroicons/react/16/solid";
 import { UTCDate } from "@date-fns/utc";
 import {utc} from "@date-fns/utc/utc";
-import {SetCurrentPuzzleContext, useCurrentPuzzle} from "@/providers/PuzzleProvider";
+import {SetCurrentPuzzleContext} from "@/providers/PuzzleProvider";
 
 function getPuzzleDateFromRoute(route: string[]): Date {
     const today = startOfToday();
