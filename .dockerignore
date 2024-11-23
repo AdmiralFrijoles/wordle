@@ -1,0 +1,14 @@
+.dockerignore
+.git*
+.husky/
+.prettierrc
+.vscode/
+CODE_OF_CONDUCT.md
+README.md
+build/
+docker/Dockerfile
+node_modules/
+**/.env.local
+
+# Do not include the solutions file in the container
+**/solutions.json
