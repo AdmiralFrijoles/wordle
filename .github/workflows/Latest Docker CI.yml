@@ -38,6 +38,7 @@ jobs:
           registry: https://ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+          logout: false
 
       - name: Build
         uses: docker/build-push-action@v4
@@ -46,6 +47,4 @@ jobs:
           file: Dockerfile
           pull: false
           push: true
-          tags: |
-            ghcr.io/admiralfrijoles/wordle:next
-            ghcr.io/admiralfrijoles/wordle:${{ steps.previoustag.outputs.tag }}
+          tags: ghcr.io/admiralfrijoles/wordle:next
