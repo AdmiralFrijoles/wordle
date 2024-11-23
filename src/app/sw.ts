@@ -20,7 +20,7 @@ const serwist = new Serwist({
 
 serwist.addEventListeners();
 
-const version = "1.0-beta" // increase for new version
+const version = "%%APP_VERSION%%" // increase for new version
 const staticCacheName = version + "_pwa-static";
 const dynamicCacheName = version + "_pwa-dynamic";
 
