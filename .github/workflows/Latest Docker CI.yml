@@ -47,4 +47,6 @@ jobs:
           file: Dockerfile
           pull: false
           push: true
-          tags: ghcr.io/admiralfrijoles/wordle:next
+          tags: |
+            ghcr.io/admiralfrijoles/dojowordle:latest
+            ghcr.io/admiralfrijoles/dojowordle:${{ steps.previoustag.outputs.tag }}
