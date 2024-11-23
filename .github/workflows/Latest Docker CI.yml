@@ -43,7 +43,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./
-          file: docker/Dockerfile
+          file: Dockerfile
           pull: false
           push: true
           tags: |
