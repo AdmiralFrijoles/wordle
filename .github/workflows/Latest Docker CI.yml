@@ -50,3 +50,9 @@ jobs:
           tags: |
             ghcr.io/admiralfrijoles/dojowordle:latest
             ghcr.io/admiralfrijoles/dojowordle:${{ steps.previoustag.outputs.tag }}
+
+      - name: Trigger webhook
+        uses: magdemajt/trigger-webhook@v1
+        with:
+          url: '${{ secrets.WATCHTOWER_SERVICE_URL }}'
+          headers: '{"Authorization": "${{ secrets.WATCHTOWER_SERVICE_TOKEN }}"}'
