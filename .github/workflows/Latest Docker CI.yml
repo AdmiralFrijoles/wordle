@@ -46,4 +46,6 @@ jobs:
           file: docker/Dockerfile
           pull: false
           push: true
-          tags: ghcr.io/admiralfrijoles/wordle:next
+          tags: |
+            ghcr.io/admiralfrijoles/wordle:next
+            ghcr.io/admiralfrijoles/wordle:${{ steps.previoustag.outputs.tag }}
