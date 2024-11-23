@@ -21,7 +21,9 @@ export default async function Header() {
                     <PuzzleSelectModal hasMultiplePuzzles={puzzleCount > 1}/>
                     <ArchiveModal/>
                 </div>
-                    <Link className="prevent-select mx-4 text-xl font-bold text-nowrap dark:text-white" href="/">
+                    <Link className="prevent-select mx-4 text-xl font-bold text-nowrap dark:text-white"
+                          href="/"
+                    >
                         {headerTitle}
                     </Link>
                 <div className="flex-1 flex justify-end ml-auto space-x-2">

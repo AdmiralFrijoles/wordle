@@ -21,6 +21,8 @@ export default function ArchiveModal() {
     const [maxDate, setMaxDate] = useState<DateValue>(today(getLocalTimeZone()));
     const [isLoadingDates, setIsLoadingDates] = useState(true);
     const router = useRouter();
+    const userTimeZone = getLocalTimeZone();
+    const localToday = today(userTimeZone);
 
     useEffect(() => {
         if (!currentPuzzle || !currentSolution)
@@ -47,11 +49,15 @@ export default function ArchiveModal() {
             if (tmpDates.length > 0) {
                 setAvailableDates(tmpDates);
                 setMinDate(tmpDates[0]);
-                setMaxDate(tmpDates[dates.length - 1])
+                let tmpMaxDate = tmpDates[dates.length - 1];
+                if (tmpMaxDate.compare(localToday) > 0) {
+                    tmpMaxDate = localToday;
+                }
+                setMaxDate(tmpMaxDate);
             } else {
                 setAvailableDates([]);
-                setMinDate(today(getLocalTimeZone()));
-                setMaxDate(today(getLocalTimeZone()))
+                setMinDate(today(userTimeZone));
+                setMaxDate(today(userTimeZone))
             }
             setIsLoadingDates(false);
         } else {

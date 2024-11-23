@@ -17,13 +17,15 @@ import {getUserPuzzleStats} from "@/lib/user-service";
 import {useSession} from "next-auth/react";
 import {buildStats} from "@/lib/stats";
 import ShareButton from "@/components/sharebutton";
+import {asDateOnly} from "@/lib/date-util";
+import {solutionExists} from "@/lib/puzzle-service";
 
 type Props = {
     appTitle: string
 }
 
 export default function RankingModal({appTitle}: Props) {
-    const { data: session } = useSession();
+    const { data: session, status: sessionStatus } = useSession();
     const {isOpen, onOpen, onOpenChange} = useDisclosure();
     const {currentPuzzle, currentSolution, currentUserSolution} = useCurrentPuzzle();
     const [isLatestGame, setIsLatestGame] = useState(false);
@@ -44,6 +46,7 @@ export default function RankingModal({appTitle}: Props) {
         gamesFailed: 0,
         winDistribution: []
     });
+    const [hasNextGame, setHasNextGame] = useState(false);
 
     useEffect(() => {
         if (currentSolution) {
@@ -62,11 +65,18 @@ export default function RankingModal({appTitle}: Props) {
         if (currentUserSolution.state === "Win") {
             onOpen();
         }
-    }, 2000, [currentUserSolution]);
+    }, 100, [currentUserSolution]);
 
     useAsync(async () => {
         if (!isOpen) return;
         setIsLoading(true);
+        if (sessionStatus === "loading") return;
+
+        if (currentPuzzle) {
+            const tomorrowHasSolution = await solutionExists(currentPuzzle.id, asDateOnly(tomorrow));
+            setHasNextGame(tomorrowHasSolution);
+        }
+
         if (session?.user?.id && currentPuzzle?.id) {
             setPuzzleStats(await getUserPuzzleStats(session.user.id, currentPuzzle.id));
         } else {
@@ -83,7 +93,7 @@ export default function RankingModal({appTitle}: Props) {
             setPuzzleStats(buildStats(userSolutions));
         }
         setIsLoading(false);
-    }, [currentUserSolution, isOpen]);
+    }, [currentUserSolution, isOpen, sessionStatus]);
 
     if (!currentPuzzle) return null;
 
@@ -114,7 +124,7 @@ export default function RankingModal({appTitle}: Props) {
                                     <div
                                         className="items-center justify-center text-center dark:text-white">
                                         <div className="inline-block w-full text-left">
-                                            {isLatestGame && (
+                                            {(isLatestGame && hasNextGame) && (
                                                 <div>
                                                     <strong>New word in:&nbsp;</strong>
                                                     <Countdown

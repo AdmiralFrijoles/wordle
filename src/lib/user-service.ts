@@ -159,7 +159,7 @@ export async function getUserPuzzleStats(userId: string, puzzleId: string): Prom
         include: {solution: true},
         where: {
             userId: userId,
-            solutionId: puzzleId
+            solution: {puzzleId: puzzleId}
         }
     });
 

@@ -7,7 +7,6 @@ import {getAppSetting, setAppSetting} from "@/lib/settings-service";
 import {formatISO} from "date-fns";
 import {UTCDate} from "@date-fns/utc";
 import {auth} from "@/lib/auth";
-import {CalendarDate} from "@internationalized/date";
 import {DateOnly} from "@/types";
 import {SETTING_DEFAULT_PUZZLE} from "@/constants/settings";
 
@@ -131,4 +130,15 @@ export async function getPuzzleNeighboringSolutions(puzzleId: string, solutionDa
         previous: previousSolution,
         next: nextSolution
     }
+}
+
+export async function solutionExists(puzzleId: string, solutionDate: DateOnly) {
+    const isoDate = formatISO(new UTCDate(solutionDate.year, solutionDate.month, solutionDate.day));
+    const count = await prisma.solution.count({
+        where: {
+            puzzleId: puzzleId,
+            date: isoDate
+        }
+    });
+    return count > 0;
 }

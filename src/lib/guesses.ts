@@ -1,4 +1,4 @@
-﻿import {CharStatus, IUserPuzzleSolution, Row} from "@/types";
+﻿import {IUserPuzzleSolution, Row} from "@/types";
 import GraphemeSplitter from "grapheme-splitter";
 
 export function initRows(

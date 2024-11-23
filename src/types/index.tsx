@@ -1,6 +1,4 @@
-﻿import {Puzzle} from "@prisma/client";
-
-export enum GameStates {
+﻿export enum GameStates {
     Unsolved = 0,
     Win = 1,
     Loss = 2

@@ -7,7 +7,7 @@ import isValidWord from "../../lib/dictionary";
 import {REVEAL_TIME_MS} from "@/constants";
 import GameGrid from "@/components/game/grid";
 import {Puzzle, Solution} from "@prisma/client";
-import {useDebounce, useEffectOnce, useUnmount, useUpdateEffect} from "react-use";
+import {useAsync, useDebounce, useEffectOnce, useUnmount, useUpdateEffect} from "react-use";
 import {alertError, clearAlert} from "@/lib/alerts";
 import {upsertUserSolution} from "@/lib/user-service";
 import {useSettings} from "@/providers/SettingsProvider";
@@ -126,7 +126,7 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
     useEffectOnce(() => {
         setUserSolutionLoading(true);
         if (!userSolution.userId) {
-            const localStorageValue = localStorage.getItem(`user-solution-${initialUserSolution.solutionId}`);
+            const localStorageValue = localStorage.getItem(`user-solution-${solution.id}`);
             if (localStorageValue) {
                 try {
                     const localUserSolution = JSON.parse(localStorageValue) as IUserPuzzleSolution;
@@ -173,8 +173,7 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
         } as IUserPuzzleSolution)
     }, 100, [gameState, currentRowIndex, isUsingHardMode]);
 
-    useUpdateEffect(() => {
-        setCurrentUserSolution(userSolution);
+    useAsync(async () => {
         async function saveUserSolution() {
             // Don't save state if the user hasn't started playing.
             if (userSolutionLoading || !userSolution || currentRowIndex <= 0) return;
@@ -195,8 +194,11 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
 
         if (!rows || userSolutionLoading) return;
 
-        saveUserSolution();
-    }, [userSolution]);
+        await saveUserSolution();
+
+        if (!isRevealing)
+            setCurrentUserSolution(userSolution);
+    }, [userSolution, isRevealing]);
 
     useUpdateEffect(() => {
         if (!userSolutionLoading) return;

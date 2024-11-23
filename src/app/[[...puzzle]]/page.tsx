@@ -62,9 +62,8 @@ function parsePathString(path: string): PathProps {
     };
 }
 
-
 export default function Page() {
-    const { data: session } = useSession();
+    const { data: session, status: sessionStatus } = useSession();
     const router = useRouter();
     const isMounted = useMountedState();
     const userTimeZone = getLocalTimeZone();
@@ -167,7 +166,7 @@ export default function Page() {
 
         }
 
-        if (!isLoading || !isMounted) return;
+        if (!isLoading || !isMounted() || sessionStatus === "loading") return;
 
         const puzzle = await loadPuzzle();
 
@@ -204,10 +203,11 @@ export default function Page() {
             neighboringSolutions.next.date.getUTCFullYear(),
             neighboringSolutions.next.date.getUTCMonth() + 1,
             neighboringSolutions.next.date.getUTCDate()) : null;
-        setNextPuzzleDate(nextDate);
+        if (nextDate && localToday.compare(nextDate) >= 0)
+            setNextPuzzleDate(nextDate);
 
         setIsLoading(false);
-    }, [isLoading]);
+    }, [isLoading, sessionStatus]);
 
     if (isLoading) return <PuzzlePageSkeleton/>;
     if (!currentPuzzle) return notFound();
