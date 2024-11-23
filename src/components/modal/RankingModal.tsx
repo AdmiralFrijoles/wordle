@@ -1,56 +1,91 @@
 ﻿"use client";
 
-import {ChartBarIcon, ClockIcon, ShareIcon} from "@heroicons/react/24/outline";
+import {ChartBarIcon, ClockIcon} from "@heroicons/react/24/outline";
 import HeaderIcon from "@/components/header/HeaderIcon";
 import BaseModal from "@/components/modal/ModalBase";
 import {useDisclosure} from "@nextui-org/use-disclosure";
 import StatBar from "@/components/statbar";
 import {useCurrentPuzzle} from "@/providers/PuzzleProvider";
-import {PuzzleStats} from "@/types";
-import {compareDesc, startOfToday, addDays, format} from "date-fns";
+import {IUserPuzzleSolution, PuzzleStats} from "@/types";
 import {useEffect, useState} from "react";
 import Countdown from "react-countdown";
-import shareStats from "@/lib/share";
 import {useSettings} from "@/providers/SettingsProvider";
-import {alertError, alertSuccess} from "@/lib/alerts";
 import Histogram from "@/components/histogram";
+import {useAsync, useDebounce} from "react-use";
+import {fromDate, toCalendarDate, DateFormatter, getLocalTimeZone, today, CalendarDate} from "@internationalized/date";
+import {getUserPuzzleStats} from "@/lib/user-service";
+import {useSession} from "next-auth/react";
+import {buildStats} from "@/lib/stats";
+import ShareButton from "@/components/sharebutton";
 
 type Props = {
     appTitle: string
 }
 
 export default function RankingModal({appTitle}: Props) {
+    const { data: session } = useSession();
     const {isOpen, onOpen, onOpenChange} = useDisclosure();
     const {currentPuzzle, currentSolution, currentUserSolution} = useCurrentPuzzle();
     const [isLatestGame, setIsLatestGame] = useState(false);
+    const [solutionDate, setSolutionDate] = useState<CalendarDate>();
     const settings = useSettings();
-    const today = startOfToday();
-    const tomorrow = addDays(today, 1);
-
-
-    useEffect(() => {
-        setIsLatestGame((currentSolution && compareDesc(today, currentSolution.date) === 0) ?? false);
-    }, [today, currentSolution]);
-
-    if (!currentPuzzle) return null;
-
-    const puzzleStats: PuzzleStats = {
-        puzzle: currentPuzzle,
+    const userTimeZone = getLocalTimeZone();
+    const numberFormat = new Intl.NumberFormat();
+    const userLocale = numberFormat.resolvedOptions().locale;
+    const localToday = today(userTimeZone);
+    const dateFormatter = new DateFormatter(userLocale, {dateStyle: "medium"});
+    const tomorrow = localToday.add({days: 1});
+    const [isLoading, setIsLoading] = useState(true);
+    const [puzzleStats, setPuzzleStats] = useState<PuzzleStats>({
         currentStreak: 0,
         successRate: 0,
         totalGames: 0,
         bestStreak: 0,
         gamesFailed: 0,
         winDistribution: []
-    }
+    });
 
-    function handleShareFailure() {
-        alertError("Failed to share stats", 5000);
-    }
+    useEffect(() => {
+        if (currentSolution) {
+            const date = toCalendarDate(fromDate(currentSolution.date, "Etc/UTC"));
+            setSolutionDate(date);
+            setIsLatestGame(localToday.compare(date) === 0);
+        } else {
+            setSolutionDate(undefined);
+            setIsLatestGame(false);
+        }
+    }, [currentSolution]);
 
-    function handleShareToClipboard() {
-        alertSuccess("Game copied to clipboard");
-    }
+    useDebounce(() => {
+        if (!currentUserSolution) return;
+
+        if (currentUserSolution.state === "Win") {
+            onOpen();
+        }
+    }, 2000, [currentUserSolution]);
+
+    useAsync(async () => {
+        if (!isOpen) return;
+        setIsLoading(true);
+        if (session?.user?.id && currentPuzzle?.id) {
+            setPuzzleStats(await getUserPuzzleStats(session.user.id, currentPuzzle.id));
+        } else {
+            const userSolutions: IUserPuzzleSolution[] = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key?.startsWith("user-solution-")) {
+                    const localStorageValue = localStorage.getItem(key);
+                    if (!localStorageValue) continue;
+                    const userSolution = JSON.parse(localStorageValue) as IUserPuzzleSolution;
+                    userSolutions.push(userSolution);
+                }
+            }
+            setPuzzleStats(buildStats(userSolutions));
+        }
+        setIsLoading(false);
+    }, [currentUserSolution, isOpen]);
+
+    if (!currentPuzzle) return null;
 
     return (
         <>
@@ -59,69 +94,63 @@ export default function RankingModal({appTitle}: Props) {
             </HeaderIcon>
 
             <BaseModal title="Statistics" isOpen={isOpen} onOpenChange={onOpenChange}>
-                <StatBar puzzleStats={puzzleStats}/>
-                {puzzleStats.totalGames > 0 && (
-                    <>
-                    <h4 className="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">
-                        Guess Distribution
-                    </h4>
-                    <Histogram
-                        isLatestGame={isLatestGame}
-                        puzzleStats={puzzleStats}
-                        isGameWon={currentUserSolution?.state === "Win"}
-                        numberOfGuessesMade={currentUserSolution?.guesses.length ?? 0}
-                    />
-                    {currentSolution && currentUserSolution && currentUserSolution.state !== "Unsolved" && (
-                        <div
-                            className="mt-5 columns-2 items-center items-stretch justify-center text-center dark:text-white sm:mt-6">
-                            <div className="inline-block w-full text-left">
-                                {isLatestGame && (
-                                    <div>
-                                        <h5>New word in</h5>
-                                        <Countdown
-                                            className="text-lg font-medium text-gray-900 dark:text-gray-100"
-                                            date={tomorrow}
-                                            daysInHours={true}
-                                        />
-                                    </div>
-                                )}
-                                {!isLatestGame && (
-                                    <div className="mt-2 inline-flex">
-                                        <ClockIcon className="mr-1 mt-2 mt-1 h-5 w-5 stroke-black dark:stroke-white"/>
-                                        <div className="mt-1 ml-1 text-center text-sm sm:text-base">
-                                            <strong>Game date:</strong>
-                                            <br/>
-                                            {format(currentSolution.date, 'd MMMM yyyy')}
+                {isLoading ?
+                    (<p>Loading...</p>) :
+                    (<div className="text-center">
+                        <StatBar puzzleStats={puzzleStats}/>
+                        {puzzleStats.totalGames > 0 && (
+                            <>
+                            <h4 className="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                Guess Distribution
+                            </h4>
+                            <Histogram
+                                isLatestGame={isLatestGame}
+                                puzzleStats={puzzleStats}
+                                isGameWon={currentUserSolution?.state === "Win"}
+                                numberOfGuessesMade={currentUserSolution?.guesses.length ?? 0}
+                            />
+                            {currentSolution && currentUserSolution && currentUserSolution.state !== "Unsolved" && (
+                                <div>
+                                    <div
+                                        className="items-center justify-center text-center dark:text-white">
+                                        <div className="inline-block w-full text-left">
+                                            {isLatestGame && (
+                                                <div>
+                                                    <strong>New word in:&nbsp;</strong>
+                                                    <Countdown
+                                                        className="inline-flex text-lg font-medium text-gray-900 dark:text-gray-100"
+                                                        date={tomorrow.toDate(userTimeZone)}
+                                                        daysInHours={true}
+                                                    />
+                                                </div>
+                                            )}
+                                            {(!isLatestGame && solutionDate) && (
+                                                <div className="mt-2 inline-flex w-full">
+                                                    <ClockIcon
+                                                        className="mr-1 mt-2 h-5 w-5 stroke-black dark:stroke-white"/>
+                                                    <div className="inline-flex mt-1 ml-1 text-center text-sm sm:text-base">
+                                                        <strong>Game date:&nbsp;</strong>
+                                                        <p>{dateFormatter.format(solutionDate.toDate(userTimeZone))}</p>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
-                                )}
-                            </div>
-                            <div>
-                                <button
-                                    type="button"
-                                    className="mt-2 inline-flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-base"
-                                    onClick={() => {
-                                        shareStats(
-                                            appTitle,
-                                            currentPuzzle,
-                                            currentSolution,
-                                            currentUserSolution,
-                                            settings.isHardMode,
-                                            settings.isDarkMode,
-                                            settings.isHighContrast,
-                                            handleShareToClipboard,
-                                            handleShareFailure
-                                        )
-                                    }}
-                                >
-                                    <ShareIcon className="mr-2 h-6 w-6 cursor-pointer dark:stroke-white"/>
-                                    Share
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                    </>
-                )}
+                                    <div className="w-full mt-4">
+                                        <ShareButton appTitle={appTitle}
+                                                     currentPuzzle={currentPuzzle}
+                                                     currentUserSolution={currentUserSolution}
+                                                     currentSolution={currentSolution}
+                                                     isHighContrast={settings.isHighContrast}
+                                                     isHardMode={settings.isHardMode}
+                                                     isDarkMode={settings.isDarkMode}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            </>
+                        )}
+                    </div>)}
             </BaseModal>
         </>
     )

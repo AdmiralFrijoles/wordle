@@ -12,7 +12,7 @@ export default function PuzzleLinkButton({link}: Props) {
 
     async function handleCopyLink() {
         try {
-            const absoluteLink = new URL(link, window.location.href);
+            const absoluteLink = new URL(link, window.location.origin);
             await navigator.clipboard.writeText(absoluteLink.href);
             alertSuccess("Copied!");
         } catch (e) {

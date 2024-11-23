@@ -25,10 +25,17 @@ export function toTimeZone(date: CalendarDate, timeZone: string): CalendarDate {
     );
 }
 
-export function asDateOnly(date: CalendarDate): DateOnly {
-    return {
-        year: date.year,
-        month: date.month - 1,
-        day: date.day
-    } as DateOnly;
+export function asDateOnly(date: CalendarDate | Date): DateOnly {
+    if (date instanceof Date)
+        return {
+            year: date.getUTCFullYear(),
+            month: date.getUTCMonth(),
+            day: date.getUTCDate()
+        } as DateOnly;
+    else
+        return {
+            year: date.year,
+            month: date.month - 1,
+            day: date.day
+        } as DateOnly;
 }

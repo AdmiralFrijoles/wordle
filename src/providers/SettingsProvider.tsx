@@ -19,6 +19,9 @@ type ContextProps = {
 
     isDarkMode: boolean,
     setIsDarkMode: (value: boolean) => void;
+
+    shareMode: string;
+    setShareMode: (value: string) => void;
 };
 
 const SettingsContext = createContext<ContextProps>({
@@ -32,7 +35,10 @@ const SettingsContext = createContext<ContextProps>({
     setIsHighContrast: () => {},
 
     isDarkMode: false,
-    setIsDarkMode: () => {}
+    setIsDarkMode: () => {},
+
+    shareMode: "markdown",
+    setShareMode: () => {}
 });
 
 export function SettingsProvider({ children }: Props) {
@@ -40,6 +46,8 @@ export function SettingsProvider({ children }: Props) {
     const [isHighContrast, setIsHighContrast] = useLocalStorage<boolean>("setting-is-high-contrast", false);
     const [isDarkMode, setIsDarkMode] = useLocalStorage<boolean>("setting-is-dark-mode", undefined);
     const [canSetIsHardMode, setCanSetIsHardMode] = useState<boolean>(true);
+    const [shareMode, setShareMode] = useLocalStorage<string>("setting-share-mode", "markdown");
+
 
     useMount(() => {
         if (isDarkMode === undefined) {
@@ -66,7 +74,8 @@ export function SettingsProvider({ children }: Props) {
             isHardMode: (isHardMode ?? false), setIsHardMode,
             canSetIsHardMode, setCanSetIsHardMode,
             isHighContrast: (isHighContrast ?? false), setIsHighContrast,
-            isDarkMode: (isDarkMode ?? true), setIsDarkMode
+            isDarkMode: (isDarkMode ?? true), setIsDarkMode,
+            shareMode: (shareMode ?? "markdown"), setShareMode,
         }}>
             {children}
         </SettingsContext.Provider>

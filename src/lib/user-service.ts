@@ -1,9 +1,11 @@
 ﻿"use server";
 
 import prisma from "@/lib/prisma";
-import {GameStates, IUserPuzzleSolution} from "@/types";
-import {UserSolution, UserSolutionState} from "@prisma/client";
+import {GameStates, IUserPuzzleSolution, PuzzleStats} from "@/types";
+import {Solution, UserSolution, UserSolutionState} from "@prisma/client";
 import {auth} from "@/lib/auth";
+import {buildStats} from "@/lib/stats";
+import {asDateOnly} from "@/lib/date-util";
 
 function toGameState(state: UserSolutionState): keyof typeof GameStates {
     switch (state) {
@@ -31,18 +33,23 @@ function fromGameState(state: keyof typeof GameStates): UserSolutionState {
     }
 }
 
-function toUserPuzzleSolution(userSolution: UserSolution): IUserPuzzleSolution {
+function toUserPuzzleSolution(userSolution: UserSolution, solution: Solution): IUserPuzzleSolution {
     return {
         userId: userSolution.userId,
         solutionId: userSolution.solutionId,
         guesses: userSolution.guesses,
         state: toGameState(userSolution.state),
-        hardMode: userSolution.hardMode
+        hardMode: userSolution.hardMode,
+        puzzleId: solution.puzzleId,
+        solutionDate: asDateOnly(solution.date),
+        maxGuesses: solution.maxGuesses,
+        solutionWord: solution.solution
     } as IUserPuzzleSolution;
 }
 
 export async function getUserSolution(userId: string, solutionId: string): Promise<IUserPuzzleSolution | null> {
     const userSolution = await prisma.userSolution.findUnique({
+        include: {solution: true},
         where: {
             userId_solutionId: {
                 userId: userId,
@@ -52,7 +59,7 @@ export async function getUserSolution(userId: string, solutionId: string): Promi
     });
 
     if (userSolution) {
-        return toUserPuzzleSolution(userSolution);
+        return toUserPuzzleSolution(userSolution, userSolution.solution);
     }
 
     return null;
@@ -145,3 +152,19 @@ export async function upsertUserSolution(userSolution: IUserPuzzleSolution): Pro
 
 
 }
+
+
+export async function getUserPuzzleStats(userId: string, puzzleId: string): Promise<PuzzleStats> {
+    const userSolutions = await prisma.userSolution.findMany({
+        include: {solution: true},
+        where: {
+            userId: userId,
+            solutionId: puzzleId
+        }
+    });
+
+    return buildStats(userSolutions.map(userSolution => toUserPuzzleSolution(userSolution, userSolution.solution)));
+}
+
+
+

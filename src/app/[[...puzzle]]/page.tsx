@@ -14,7 +14,7 @@ import {
 } from "@/lib/puzzle-service";
 import {asDateOnly} from "@/lib/date-util";
 import NoSolution from "@/app/[[...puzzle]]/no-solution";
-import { useSession } from "next-auth/react"
+import {useSession} from "next-auth/react"
 import {getUserSolution} from "@/lib/user-service";
 import {IUserPuzzleSolution} from "@/types";
 import {Tooltip} from "@nextui-org/react";
@@ -138,13 +138,19 @@ export default function Page() {
             }
         }
 
-        async function loadUserSolution(solutionId: string, userId: string | null | undefined) {
+        async function loadUserSolution(puzzleId: string, solutionWord: string,
+                                        maxGuesses: number,
+                                        solutionId: string, userId: string | null | undefined) {
             const defaultUserSolution = {
                 solutionId: solutionId,
                 userId: userId,
                 guesses: [],
                 state: "Unsolved",
-                hardMode: false
+                hardMode: false,
+                solutionWord: solutionWord,
+                solutionDate: selectedDate,
+                maxGuesses: maxGuesses,
+                puzzleId: puzzleId
             } as IUserPuzzleSolution;
 
             try {
@@ -182,7 +188,7 @@ export default function Page() {
             return;
         }
 
-        await loadUserSolution(solution.id, session?.user?.id);
+        await loadUserSolution(puzzle.id, solution.solution, solution.maxGuesses, solution.id, session?.user?.id);
 
         const neighboringSolutions = puzzle?.id ?
             await getPuzzleNeighboringSolutions(puzzle.id, asDateOnly(selectedDate)) :

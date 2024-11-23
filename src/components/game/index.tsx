@@ -14,6 +14,7 @@ import {useSettings} from "@/providers/SettingsProvider";
 import {useCurrentPuzzle} from "@/providers/PuzzleProvider";
 import {findFirstUnusedReveal, getGuessRows} from "@/lib/guesses";
 import {Tooltip} from "@nextui-org/tooltip";
+import {asDateOnly} from "@/lib/date-util";
 
 type Props = {
     puzzle: Puzzle;
@@ -164,7 +165,11 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
             ...userSolution,
             guesses: getGuesses(),
             state: gameState,
-            hardMode: isUsingHardMode
+            hardMode: isUsingHardMode,
+            puzzleId: puzzle.id,
+            solutionDate: asDateOnly(solution.date),
+            maxGuesses: maxGuesses,
+            solutionWord: solution.solution
         } as IUserPuzzleSolution)
     }, 100, [gameState, currentRowIndex, isUsingHardMode]);
 

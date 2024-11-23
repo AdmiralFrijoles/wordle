@@ -3,6 +3,7 @@ import {IUserPuzzleSolution} from "@/types";
 import { UAParser } from 'ua-parser-js'
 import {getGuessRows} from "@/lib/guesses";
 import {format} from "date-fns";
+import {utc} from "@date-fns/utc/utc";
 
 const webShareApiDeviceTypes: string[] = ['mobile', 'smarttv', 'wearable']
 const parser = new UAParser();
@@ -19,17 +20,36 @@ export default function shareStats(
     isDarkMode: boolean,
     isHighContrastMode: boolean,
     handleShareToClipboard: () => void,
-    handleShareFailure: () => void
+    handleShareFailure: () => void,
+    markdown: boolean
 ) {
-    const textToShare =
-        `${appTitle} | ${puzzle.title} | ${format(solution.date, "P")} | ${
-            userSolution.state === "Loss" ? 'X' : userSolution.guesses.length
-        }/${solution.maxGuesses}${isHardMode ? '*' : ''}\n\n` +
-        generateEmojiGrid(
-            solution,
-            userSolution,
-            getEmojiTiles(isDarkMode, isHighContrastMode)
-        );
+    const numberFormat = new Intl.NumberFormat();
+
+    const puzzleUrl = new URL(`${puzzle.slug}`, window.location.origin);
+    const puzzleDateUrl = new URL(`${puzzle.slug}/${format(solution.date, "yyyy/MM/dd", {in: utc})}`, window.location.origin);
+
+    let textToShare: string;
+    if (markdown) {
+        textToShare =
+            `**[${appTitle} - ${puzzle.title}](<${puzzleUrl.href}>)**\n*[${format(solution.date, "PP", {in: utc})}](<${puzzleDateUrl.href}>)*\n${
+                userSolution.state === "Loss" ? 'X' : numberFormat.format(userSolution.guesses.length)
+            }/${numberFormat.format(solution.maxGuesses)}${isHardMode ? '*' : ''}\n\n` +
+            generateEmojiGrid(
+                solution,
+                userSolution,
+                getEmojiTiles(isDarkMode, isHighContrastMode)
+            );
+    } else {
+        textToShare =
+            `${appTitle} - ${puzzle.title}\n${format(solution.date, "PP", {in: utc})}\n${
+                userSolution.state === "Loss" ? 'X' : numberFormat.format(userSolution.guesses.length)
+            }/${numberFormat.format(solution.maxGuesses)}${isHardMode ? '*' : ''}\n\n` +
+            generateEmojiGrid(
+                solution,
+                userSolution,
+                getEmojiTiles(isDarkMode, isHighContrastMode)
+            );
+    }
 
     const shareData = { text: textToShare }
     let shareSuccess = false

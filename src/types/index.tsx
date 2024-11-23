@@ -29,10 +29,13 @@ export interface IUserPuzzleSolution {
     state: keyof typeof GameStates;
     guesses: string[];
     hardMode: boolean;
+    puzzleId: string;
+    solutionDate: DateOnly;
+    maxGuesses: number;
+    solutionWord: string;
 }
 
 export type PuzzleStats = {
-    puzzle: Puzzle;
     winDistribution: number[];
     gamesFailed: number;
     currentStreak: number;
