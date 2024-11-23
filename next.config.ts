@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import withSerwistInit from "@serwist/next";
 
 const nextConfig: NextConfig = {
+    output: "standalone",
     reactStrictMode: false,
     webpack: (config) => {
         config.resolve.fallback = {
