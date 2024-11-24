@@ -1,41 +1,36 @@
 ﻿import {UserCircleIcon} from "@heroicons/react/24/outline";
 import HeaderIcon from "@/components/header/HeaderIcon";
 import {auth, signIn, signOut} from "@/lib/auth";
+import {Avatar} from "@nextui-org/react";
+import UserModal from "@/components/modal/UserModal";
 
 export default async function CurrentUser() {
     const session = await auth();
 
-    if (!session?.user) {
-        return (
-            <HeaderIcon tooltipContent="Sign In">
-                <form action={async () => {
-                    "use server";
-                    await signIn("discord");
-                }}>
-                    <button type="submit" className="w-full h-full">
-                        <UserCircleIcon className="dark:stroke-white"/>
-                    </button>
-                </form>
-            </HeaderIcon>
-        );
+    async function signOutUser() {
+        "use server";
+        await signOut();
     }
 
-    return (
-        <HeaderIcon tooltipContent="Sign Out">
+    if (!session?.user) {
+        return (
             <form action={async () => {
                 "use server";
-                await signOut();
+                await signIn("discord");
             }}>
-                <button type="submit" className="w-full h-full">
-                    {session.user.image ?
-                        <img className="rounded-full cursor-pointer animated"
-                             src={session.user.image}
-                             alt={session.user.name ?? "user"}
-                        /> :
-                        <UserCircleIcon className="dark:stroke-white"/>
-                    }
-                </button>
+                <HeaderIcon tooltipContent="Sign In">
+                    <button type="submit">
+                        <Avatar
+                            icon={<UserCircleIcon className="dark:stroke-white"/>}
+                            className="bg-transparent w-6 h-6"
+                        />
+                    </button>
+                 </HeaderIcon>
             </form>
-        </HeaderIcon>
     )
+    } else {
+        return (
+            <UserModal signOutAction={signOutUser}/>
+        )
+    }
 }
