@@ -7,10 +7,14 @@ import BaseModal from "@/components/modal/ModalBase";
 import SettingsToggle from "@/components/settings/SettingsToggle";
 import {useSettings} from "@/providers/SettingsProvider";
 import {alertError} from "@/lib/alerts";
+import {APP_VERSION} from "@/constants";
+import {useGlobalModal} from "@/providers/GlobalModalProvider";
+import {Button} from "@nextui-org/react";
 
 export default function SettingsModal() {
     const {isOpen, onOpen, onOpenChange} = useDisclosure();
     const settings = useSettings();
+    const changelogModal = useGlobalModal("changelog");
 
     function trySetIsHardMode(enabled: boolean) {
         if (!settings.canSetIsHardMode) {
@@ -44,6 +48,21 @@ export default function SettingsModal() {
                         handleFlag={settings.setIsHighContrast}
                         description="For improved color vision"
                     />
+                    <div className="flex justify-between gap-4 py-3">
+                        <div className="mt-0 text-left text-gray-500 dark:text-gray-300">
+                            <p className="leading-none">App Version</p>
+                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-300">
+                                v{APP_VERSION}
+                            </p>
+                        </div>
+                        {changelogModal &&
+                            <Button
+                                onPress={changelogModal.onOpenChange}
+                                className="min-w-24 h-9 flex shrink-0 rounded-md p-1 bg-indigo-600 hover:bg-indigo-700"
+                            >
+                            What&#39;s New
+                            </Button>}
+                    </div>
                 </div>
             </BaseModal>
         </>
