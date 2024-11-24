@@ -159,7 +159,10 @@ export async function getUserPuzzleStats(userId: string, puzzleId: string): Prom
         include: {solution: true},
         where: {
             userId: userId,
-            solution: {puzzleId: puzzleId}
+            solution: {puzzleId: puzzleId},
+            NOT: {
+                state: "UNSOLVED"
+            }
         }
     });
 

@@ -13,11 +13,13 @@ const defaultPuzzleStats: PuzzleStats = {
 export function buildStats(userSolutions: IUserPuzzleSolution[]): PuzzleStats {
     if (!userSolutions || userSolutions.length === 0) return defaultPuzzleStats;
 
-    userSolutions = userSolutions.sort((a, b) => {
-        const aDate = new CalendarDate(a.solutionDate.year, a.solutionDate.month, a.solutionDate.day);
-        const bDate = new CalendarDate(b.solutionDate.year, b.solutionDate.month, b.solutionDate.day);
-        return aDate.compare(bDate);
-    })
+    userSolutions = userSolutions
+        .filter(x => x.state !== "Unsolved")
+        .sort((a, b) => {
+            const aDate = new CalendarDate(a.solutionDate.year, a.solutionDate.month, a.solutionDate.day);
+            const bDate = new CalendarDate(b.solutionDate.year, b.solutionDate.month, b.solutionDate.day);
+            return aDate.compare(bDate);
+        });
 
     const puzzleMaxGuesses = userSolutions
         .map(s => s.maxGuesses)

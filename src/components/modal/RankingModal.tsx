@@ -87,6 +87,7 @@ export default function RankingModal({appTitle}: Props) {
                     const localStorageValue = localStorage.getItem(key);
                     if (!localStorageValue) continue;
                     const userSolution = JSON.parse(localStorageValue) as IUserPuzzleSolution;
+                    if (userSolution.state === "Unsolved") continue;
                     userSolutions.push(userSolution);
                 }
             }
