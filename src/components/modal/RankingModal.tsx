@@ -11,7 +11,7 @@ import {useEffect, useState} from "react";
 import Countdown from "react-countdown";
 import {useSettings} from "@/providers/SettingsProvider";
 import Histogram from "@/components/histogram";
-import {useAsync, useDebounce} from "react-use";
+import {useAsync} from "react-use";
 import {fromDate, toCalendarDate, DateFormatter, getLocalTimeZone, today, CalendarDate} from "@internationalized/date";
 import {getUserPuzzleStats} from "@/lib/user-service";
 import {useSession} from "next-auth/react";
@@ -19,6 +19,7 @@ import {buildStats} from "@/lib/stats";
 import ShareButton from "@/components/sharebutton";
 import {asDateOnly} from "@/lib/date-util";
 import {solutionExists} from "@/lib/puzzle-service";
+import {useGlobalModal} from "@/providers/GlobalModalProvider";
 
 type Props = {
     appTitle: string
@@ -26,7 +27,7 @@ type Props = {
 
 export default function RankingModal({appTitle}: Props) {
     const { data: session, status: sessionStatus } = useSession();
-    const {isOpen, onOpen, onOpenChange} = useDisclosure();
+    const {isOpen, onOpen, onOpenChange} = useGlobalModal("ranking", useDisclosure())!;
     const {currentPuzzle, currentSolution, currentUserSolution} = useCurrentPuzzle();
     const [isLatestGame, setIsLatestGame] = useState(false);
     const [solutionDate, setSolutionDate] = useState<CalendarDate>();
@@ -58,14 +59,6 @@ export default function RankingModal({appTitle}: Props) {
             setIsLatestGame(false);
         }
     }, [currentSolution]);
-
-    useDebounce(() => {
-        if (!currentUserSolution) return;
-
-        if (currentUserSolution.state !== "Unsolved") {
-            onOpen();
-        }
-    }, 100, [currentUserSolution]);
 
     useAsync(async () => {
         if (!isOpen) return;
