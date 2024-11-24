@@ -45,7 +45,7 @@ export default function ChangelogModal() {
     });
 
     return (
-        <BaseModal title={(
+        <BaseModal placement="top" title={(
             <>
                 <h2>What&#39;s New</h2>
                 <p className="text-sm text-gray-400">{dateFormatter.format(releaseDate.toDate(userTimeZone))}</p>

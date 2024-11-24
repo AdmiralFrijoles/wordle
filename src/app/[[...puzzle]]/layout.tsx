@@ -11,6 +11,7 @@ import ChangelogModal from "@/components/modal/ChangelogModal";
 import {fileExists} from "next/dist/lib/file-exists";
 import {APP_VERSION} from "@/constants";
 import path from "node:path";
+import {VersionChecker} from "@/components/VersionChecker";
 
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -239,6 +240,7 @@ export default async function RootLayout({children}: Readonly<{
                 </div>
                 {hasChangelog && <ChangelogModal/>}
             </div>
+            <VersionChecker/>
         </Providers>
         </body>
         </html>
