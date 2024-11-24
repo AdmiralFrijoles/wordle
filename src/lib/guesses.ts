@@ -1,16 +1,18 @@
-﻿import {IUserPuzzleSolution, Row} from "@/types";
+﻿import {CharStatus, IUserPuzzleSolution, Row} from "@/types";
 import GraphemeSplitter from "grapheme-splitter";
 
 export function initRows(
     maxGuesses: number,
-    wordLength: number
+    wordLength: number,
+    userSolution?: IUserPuzzleSolution
 ) {
     const temp: Row[] = [];
     for (let i = 0; i < maxGuesses; i++) {
         const tempRow: Row = [];
         for (let j = 0; j < wordLength; j++) {
+            const letter = userSolution && userSolution.guesses.length > i && userSolution.guesses[i].length > j ? userSolution.guesses[i][j] : null;
             tempRow.push({
-                value: "",
+                value: letter?.toLocaleUpperCase() ?? "",
                 status: "Guessing",
             });
         }
@@ -25,21 +27,10 @@ export function getGuessRows(
     maxGuesses: number,
     wordLength: number
 ) {
-    const tempRows = initRows(maxGuesses, wordLength);
-    const numRows = Math.min(userSolution.guesses.length, maxGuesses);
-    for (let r = 0; r < numRows; r++) {
-        const numChars = Math.min(userSolution.guesses[r].length, wordLength);
-        for (let c = 0; c < numChars; c++) {
-            const letter = userSolution.guesses[r][c];
-            tempRows[r][c].value = letter;
-            if (solution[c].toLocaleUpperCase() === letter.toLocaleUpperCase())
-                tempRows[r][c].status = "Correct";
-            else if (solution.toLocaleUpperCase().includes(letter.toLocaleUpperCase()))
-                tempRows[r][c].status = "Present";
-            else
-                tempRows[r][c].status = "Absent";
-        }
-    }
+    const tempRows = initRows(maxGuesses, wordLength, userSolution);
+    tempRows.forEach((row) => {
+        setRowGuessStatuses(solution, row);
+    });
     return tempRows;
 }
 
@@ -87,4 +78,71 @@ export function findFirstUnusedReveal(
 
 export function unicodeSplit (word: string) {
     return new GraphemeSplitter().splitGraphemes(word)
+}
+
+export function getKeyboardGuessStatuses(solution: string, guesses: Row[]): {[key: string]: CharStatus} {
+    const charObj: {[key: string]: CharStatus} = {};
+    const splitSolution = unicodeSplit(solution.toLocaleUpperCase());
+    guesses.forEach((row) => {
+        row.forEach((cell, i) => {
+            if (!splitSolution.includes(cell.value.toLocaleUpperCase())) {
+                return (charObj[cell.value.toLocaleUpperCase()] = "Absent");
+            }
+
+            if (cell.value.toLocaleUpperCase() === splitSolution[i]) {
+                return (charObj[cell.value.toLocaleUpperCase()] = "Correct");
+            }
+
+            if (charObj[cell.value.toLocaleUpperCase()] !== "Correct") {
+                return (charObj[cell.value.toLocaleUpperCase()] = "Present");
+            }
+        })
+    })
+    return charObj;
+}
+
+export function setRowGuessStatuses(
+    solution: string,
+    guess: Row
+) {
+    // If the row is empty then the user hasn't made a guess yet.
+    if (!guess.every(x => x.value !== "")) {
+        guess.forEach(x => x.status = "Guessing")
+        return;
+    }
+
+    const splitSolution = unicodeSplit(solution.toLocaleUpperCase());
+    const solutionCharsTaken = splitSolution.map(() => false);
+
+    // First we check if any letter is in the correct place
+    guess.forEach((cell, i) => {
+        if (cell.value.toLocaleUpperCase() === splitSolution[i]) {
+            cell.status = "Correct";
+            solutionCharsTaken[i] = true;
+            return;
+        }
+    });
+
+    // Then check if any unused letters are present in the solution
+    guess.forEach((cell) => {
+        if (cell.status !== "Guessing") return;
+
+        if (!splitSolution.includes(cell.value.toLocaleUpperCase())) {
+            cell.status = "Absent";
+            return;
+        }
+
+        const indexOfPresentChar = splitSolution.findIndex(
+            (x, index) => x === cell.value.toLocaleUpperCase() && !solutionCharsTaken[index]
+        );
+
+        if (indexOfPresentChar > -1) {
+            cell.status = "Present";
+            solutionCharsTaken[indexOfPresentChar] = true;
+            return;
+        } else {
+            cell.status = "Absent";
+            return;
+        }
+    });
 }
