@@ -8,17 +8,21 @@ type Props = {
     children: React.ReactNode;
     isOpen: boolean,
     onOpenChange: (isOpen: boolean) => void;
+    isDismissible?: boolean;
 }
 
 export default function BaseModal({
                                       title,
                                       children,
                                       isOpen,
-                                      onOpenChange
+                                      onOpenChange,
+                                      isDismissible
 }: Props) {
     return (
         <Modal isOpen={isOpen}
                onOpenChange={onOpenChange}
+               isDismissable={isDismissible}
+               isKeyboardDismissDisabled={!isDismissible}
                placement="center"
                backdrop="blur"
                classNames={{
@@ -27,7 +31,7 @@ export default function BaseModal({
                    header: "text-center text-lg font-medium leading-6 text-gray-900 dark:text-gray-100 pt-0 pb-1",
                }}
                closeButton={(
-                   <button tabIndex={0} aria-pressed="false" className="absolute right-4 top-4">
+                   <button tabIndex={0} aria-pressed="false" aria-label="close modal" className="absolute right-4 top-4">
                        <XCircleIcon className="h-6 w-6 cursor-pointer animated dark:stroke-white"/>
                    </button>
                )}
