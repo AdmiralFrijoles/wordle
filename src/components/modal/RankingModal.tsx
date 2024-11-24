@@ -62,7 +62,7 @@ export default function RankingModal({appTitle}: Props) {
     useDebounce(() => {
         if (!currentUserSolution) return;
 
-        if (currentUserSolution.state === "Win") {
+        if (currentUserSolution.state !== "Unsolved") {
             onOpen();
         }
     }, 100, [currentUserSolution]);
