@@ -35,7 +35,7 @@ export function buildStats(userSolutions: IUserPuzzleSolution[]): PuzzleStats {
             numWins++;
             currentStreak++;
             bestStreak = Math.max(bestStreak, currentStreak);
-            winDistribution[userSolution.guesses.length]++;
+            winDistribution[userSolution.guesses.length - 1]++;
         } else {
             numFailed++;
             currentStreak = 0;
