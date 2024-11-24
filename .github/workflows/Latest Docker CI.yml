@@ -68,9 +68,3 @@ jobs:
           tags: |
             ghcr.io/admiralfrijoles/dojowordle:latest
             ghcr.io/admiralfrijoles/dojowordle:${{ github.event_name != 'workflow_dispatch' && steps.previoustag.outputs.tag || github.event.inputs.version }}
-
-      - name: Trigger webhook
-        uses: magdemajt/trigger-webhook@v1
-        with:
-          url: '${{ secrets.WATCHTOWER_SERVICE_URL }}'
-          headers: '{"Authorization": "${{ secrets.WATCHTOWER_SERVICE_TOKEN }}"}'
