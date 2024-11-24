@@ -6,6 +6,7 @@ import {Providers} from "@/providers";
 import {Toaster} from "react-hot-toast";
 import {getAppSetting} from "@/lib/settings-service";
 import {SETTING_APP_DESCRIPTION, SETTING_APP_TITLE} from "@/constants/settings";
+import Footer from "@/components/footer";
 
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -220,10 +221,13 @@ export default function RootLayout({children}: Readonly<{
         <Providers>
             <div className="flex h-full flex-col">
                 <Toaster position="top-center"/>
-                <Header/>
-                <div
-                    className="mx-auto flex w-full grow flex-col px-1 pb-8 pt-2 sm:px-6 md:max-w-7xl lg:px-8 short:pb-2 short:pt-2">
-                    {children}
+                <div className="flex flex-col h-screen">
+                    <Header/>
+                    <div
+                        className="mx-auto flex w-full grow flex-col px-1 pb-8 pt-2 sm:px-6 md:max-w-7xl lg:px-8 short:pb-2 short:pt-2">
+                        {children}
+                    </div>
+                    <Footer/>
                 </div>
             </div>
         </Providers>

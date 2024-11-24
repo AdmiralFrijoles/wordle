@@ -4,6 +4,11 @@ on:
   release:
     types: [created]
   workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        type: string
+        description: semver
 
 jobs:
   build:
@@ -16,17 +21,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Get Hash
+        id: hash
+        run: echo "git_hash=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_HASH
+
       - name: Get previous tag
         id: previoustag
         uses: 'WyriHaximus/github-action-get-previous-tag@v1'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Find and Replace
+      - name: Set App Version
         uses: jacobtomlinson/gha-find-replace@v3
         with:
           find: "%%APP_VERSION%%"
-          replace: ${{ steps.previoustag.outputs.tag }}
+          replace: ${{ github.event_name != 'workflow_dispatch' && steps.previoustag.outputs.tag || github.event.inputs.version }}
+          regex: false
+
+      - name: Set Git Hash
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "%%GIT_HASH%%"
+          replace: ${{ env.hash }}
           regex: false
 
       - name: Set up Docker Buildx
