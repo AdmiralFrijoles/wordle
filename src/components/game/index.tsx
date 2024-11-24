@@ -15,6 +15,7 @@ import {useCurrentPuzzle} from "@/providers/PuzzleProvider";
 import {findFirstUnusedReveal, getGuessRows, setRowGuessStatuses} from "@/lib/guesses";
 import {Tooltip} from "@nextui-org/tooltip";
 import {asDateOnly} from "@/lib/date-util";
+import {useGlobalModal} from "@/providers/GlobalModalProvider";
 
 type Props = {
     puzzle: Puzzle;
@@ -37,6 +38,8 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
     const timer = useRef<NodeJS.Timeout>();
     const [currentRowClass, setCurrentRowClass] = useState("");
     const [isUsingHardMode, setIsUsingHardMode] = useState(false);
+    const [isJustCompleted, setIsJustCompleted] = useState(false);
+    const rankingModal = useGlobalModal("ranking");
 
     function clearCurrentRowClass () {
         setCurrentRowClass("")
@@ -101,14 +104,16 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
 
         if (isSolution) {
             setGameState("Win");
+            setIsJustCompleted(true);
         } else if (currentRowIndex === rows.length - 1) {
             setGameState("Loss");
+            setIsJustCompleted(true);
         } else {
             setText("");
         }
         setCurrentRowIndex(currentRowIndex + 1);
 
-        //return () => clearTimeout(timer.current);
+        return () => clearTimeout(timer.current);
     }
 
     function deleteChar() {
@@ -192,6 +197,12 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
         if (!isRevealing)
             setCurrentUserSolution(userSolution);
     }, [userSolution, isRevealing]);
+
+    useUpdateEffect(() => {
+        if (!isJustCompleted || isRevealing || !rankingModal) return;
+        rankingModal.onOpen();
+        setIsJustCompleted(false);
+    }, [isJustCompleted, isRevealing])
 
     useUpdateEffect(() => {
         if (!userSolutionLoading) return;
