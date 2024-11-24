@@ -12,7 +12,7 @@ import {alertError, clearAlert} from "@/lib/alerts";
 import {upsertUserSolution} from "@/lib/user-service";
 import {useSettings} from "@/providers/SettingsProvider";
 import {useCurrentPuzzle} from "@/providers/PuzzleProvider";
-import {findFirstUnusedReveal, getGuessRows} from "@/lib/guesses";
+import {findFirstUnusedReveal, getGuessRows, setRowGuessStatuses} from "@/lib/guesses";
 import {Tooltip} from "@nextui-org/tooltip";
 import {asDateOnly} from "@/lib/date-util";
 
@@ -58,14 +58,7 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
 
     function getStatuses() {
         const currentRow = rows[currentRowIndex];
-        for (let i = 0; i < currentRow.length; i++) {
-            if (solution.solution[i].toLocaleUpperCase() === text[i].toLocaleUpperCase())
-                currentRow[i].status = "Correct";
-            else if (solution.solution.toLocaleUpperCase().includes(text[i].toLocaleUpperCase()))
-                currentRow[i].status = "Present";
-            else
-                currentRow[i].status = "Absent";
-        }
+        setRowGuessStatuses(solution.solution, currentRow);
         setRows([...rows]);
     }
 
@@ -99,11 +92,11 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
             }
         }
 
-        setIsRevealing(true)
+        setIsRevealing(true);
         getStatuses();
         clearTimeout(timer.current)
         timer.current = setTimeout(() => {
-            setIsRevealing(false)
+            setIsRevealing(false);
         }, REVEAL_TIME_MS * wordLength);
 
         if (isSolution) {
@@ -115,7 +108,7 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
         }
         setCurrentRowIndex(currentRowIndex + 1);
 
-        return () => clearTimeout(timer.current);
+        //return () => clearTimeout(timer.current);
     }
 
     function deleteChar() {
@@ -237,6 +230,7 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
             <Keyboard
                 onLetterClick={handleLetterClick}
                 onSubmit={handleSubmit}
+                solution={solution.solution}
                 rows={rows.slice(0, currentRowIndex)}
                 onDelete={deleteChar}
                 isRevealing={isRevealing}

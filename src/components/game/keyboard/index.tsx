@@ -1,7 +1,8 @@
-﻿import {CharStatus, Row} from "@/types";
-import {useEffect, useMemo} from "react";
+﻿import {Row} from "@/types";
+import {useEffect} from "react";
 import Key from "@/components/game/key";
 import {BackspaceIcon} from "@heroicons/react/24/outline";
+import {getKeyboardGuessStatuses} from "@/lib/guesses";
 
 const keyboardLayout = [
     ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
@@ -13,6 +14,7 @@ type Props = {
     onLetterClick: (letter: string) => void;
     onSubmit: () => void;
     onDelete: () => void;
+    solution: string;
     rows: Row[];
     isRevealing?: boolean;
 };
@@ -21,18 +23,12 @@ export default function Keyboard({
                                      onLetterClick,
                                      onSubmit,
                                      onDelete,
+                                     solution,
                                      rows,
                                      isRevealing
 }: Props) {
-    const cells = useMemo(() => rows.flat(), [rows]);
     const keyboardRowCount = keyboardLayout.length;
-    const checkStatus = (key: string) => {
-        for (let i = 0; i < cells.length; i++) {
-            if (cells[i].value === key && cells[i].status === "Absent")
-                return "Absent" as CharStatus;
-        }
-        return "Guessing" as CharStatus;
-    };
+    const statuses = getKeyboardGuessStatuses(solution, rows);
 
     useEffect(() => {
         function listener(e: KeyboardEvent) {
@@ -63,7 +59,7 @@ export default function Keyboard({
                     <Key key={key}
                          value={key}
                          onClick={onLetterClick}
-                         status={checkStatus(key)}
+                         status={statuses[key]}
                          isRevealing={isRevealing}/>
                 ))}
                 {(rowIndex === keyboardRowCount - 1) &&
