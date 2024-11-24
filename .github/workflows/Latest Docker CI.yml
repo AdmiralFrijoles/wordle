@@ -21,11 +21,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set short git commit SHA
-        id: vars
+      - name: set release date
         run: |
-          calculatedSha=$(git rev-parse --short ${{ github.sha }})
-          echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
+          echo "RELEASE_DATE=$(date --rfc-3339=date)" >> ${GITHUB_ENV}
 
       - name: Get previous tag
         id: previoustag
@@ -40,11 +38,11 @@ jobs:
           replace: ${{ github.event_name != 'workflow_dispatch' && steps.previoustag.outputs.tag || github.event.inputs.version }}
           regex: false
 
-      - name: Set Git Hash
+      - name: Set Release Date
         uses: jacobtomlinson/gha-find-replace@v3
         with:
-          find: "%%GIT_HASH%%"
-          replace: ${{ env.COMMIT_SHORT_SHA }}
+          find: "%%APP_RELEASE_DATE%%"
+          replace: ${{ env.RELEASE_DATE }}
           regex: false
 
       - name: Set up Docker Buildx
