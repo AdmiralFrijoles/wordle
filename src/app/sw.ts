@@ -1,6 +1,7 @@
 ﻿import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
 import { Serwist } from "serwist";
+import {randomUUID} from "node:crypto";
 
 declare global {
     interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -20,7 +21,7 @@ const serwist = new Serwist({
 
 serwist.addEventListeners();
 
-const version = "%%APP_VERSION%%" // increase for new version
+const version = process.env.NODE_ENV === "development" ? randomUUID().toString() : "%%APP_VERSION%%" // increase for new version
 const staticCacheName = version + "_pwa-static";
 const dynamicCacheName = version + "_pwa-dynamic";
 
