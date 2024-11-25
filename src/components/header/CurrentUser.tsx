@@ -21,7 +21,7 @@ export default async function CurrentUser() {
                 <HeaderIcon tooltipContent="Sign In">
                     <button type="submit">
                         <Avatar
-                            icon={<UserCircleIcon className="dark:stroke-white"/>}
+                            icon={<UserCircleIcon className="dark:stroke-white w-6 h-6"/>}
                             className="bg-transparent w-6 h-6"
                         />
                     </button>
