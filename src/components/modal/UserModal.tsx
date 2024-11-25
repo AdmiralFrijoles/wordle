@@ -19,18 +19,18 @@ export default function UserModal({signOutAction}: Props) {
         <>
             {sessionStatus === "loading" && (
                 <Avatar
-                    className="bg-transparent w-full h-full"
-                    icon={<UserCircleIcon className="dark:stroke-white"/>}
+                    className="bg-transparent w-6 h-6"
+                    icon={<UserCircleIcon className="dark:stroke-white w-6 h-6"/>}
                 />
             )}
             {sessionStatus === "authenticated" && session && (
                 <>
                     <HeaderIcon tooltipContent="User Menu">
-                        <div className="w-full h-full" onClick={onOpen}>
+                        <div className="w-6 h-6" onClick={onOpen}>
                             <Avatar
                                 src={session.user.image ?? undefined}
                                 className="bg-transparent w-full h-full"
-                                icon={<UserCircleIcon className="dark:stroke-white"/>}
+                                icon={<UserCircleIcon className="dark:stroke-white w-full h-full"/>}
                                 showFallback
                             />
                         </div>
