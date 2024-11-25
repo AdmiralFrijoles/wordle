@@ -137,7 +137,7 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
     });
 
     useEffect(() => {
-        if (rows.length === 0) return;
+        if (rows.length === 0 || currentRowIndex > rows.length - 1 || currentRowIndex < 0) return;
         const currentRow = rows[currentRowIndex];
         for (let i = 0; i < currentRow.length; i++) {
             if (i < text.length) {
@@ -202,7 +202,7 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
         if (!isJustCompleted || isRevealing || !rankingModal) return;
         rankingModal.onOpen();
         setIsJustCompleted(false);
-    }, [isJustCompleted, isRevealing])
+    }, [isJustCompleted, isRevealing]);
 
     useUpdateEffect(() => {
         if (!userSolutionLoading) return;
@@ -224,28 +224,37 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
         setCurrentUserSolution(null);
     })
 
+
     return (
         <div
-            className="mx-auto flex w-full grow flex-col px-1 pb-8sm:px-6 md:max-w-7xl lg:px-8 short:pb-2 pt-4 short:pt-2">
-            <div className="flex grow flex-col items-center justify-center pt-0 pb-4 short:pb-2">
-                {(isUsingHardMode || settings.isHardMode) && <Tooltip content="Any revealed hints must be used in subsequent guesses">
-                    <p className="text-sm text-amber-400">Hard Mode Enabled</p>
-                </Tooltip>}
+            className="mx-auto flex w-full grow flex-col px-1 pb-2 sm:px-6 md:max-w-7xl lg:px-8 short:pb-2 pt-2 short:pt-2">
+            <div className="flex grow flex-col items-center justify-center pt-0 pb-2 short:pb-1 space-y-1">
+                {(isUsingHardMode || settings.isHardMode) &&
+                    <Tooltip content="Any revealed hints must be used in subsequent guesses">
+                        <p className="prevent-select font-semibold text-sm px-2 pb-2 text-warning-900 dark:text-warning-400">Hard Mode</p>
+                    </Tooltip>}
+                {gameState == "Loss" && <p className="prevent-select uppercase text-lg font-semibold tracking-widest px-2 pb-1 rounded shadowed bg-red-400 dark:bg-red-700 text-white border-slate-400 dark:border-slate-700">
+                    {solution.solution}
+                </p>}
             </div>
-            <GameGrid
-                rows={rows}
-                isRevealing={isRevealing}
-                currentRowIndex={currentRowIndex}
-                currentRowClassName={currentRowClass}
-            />
-            <Keyboard
-                onLetterClick={handleLetterClick}
-                onSubmit={handleSubmit}
-                solution={solution.solution}
-                rows={rows.slice(0, currentRowIndex)}
-                onDelete={deleteChar}
-                isRevealing={isRevealing}
-            />
+            <div>
+                <div className="flex grow flex-col pb-6 short:pb-2">
+                    <GameGrid
+                        rows={rows}
+                        isRevealing={isRevealing}
+                        currentRowIndex={currentRowIndex}
+                        currentRowClassName={currentRowClass}
+                    />
+                </div>
+                <Keyboard
+                    onLetterClick={handleLetterClick}
+                    onSubmit={handleSubmit}
+                    solution={solution.solution}
+                    rows={rows.slice(0, currentRowIndex)}
+                    onDelete={deleteChar}
+                    isRevealing={isRevealing}
+                />
+            </div>
         </div>
     )
 }
