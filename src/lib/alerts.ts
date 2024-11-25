@@ -17,5 +17,6 @@ export function alertError(message: string, timeout: number = 5000): string {
     return toast(message, {
         duration: timeout,
         style: { background: "#f56565", color: "#fff"},
+        position: "top-center"
     })
 }
