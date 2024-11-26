@@ -35,7 +35,7 @@ export default async function manifest(props: InferGetServerSidePropsType<typeof
                 "type": "image/x-icon"
             },
             {
-                "src": "/pwa/ios/icon.png",
+                "src": "/pwa/ios/splash_screens/icon.png",
                 "sizes": "any",
                 "type": "image/png",
                 "purpose": "any"
