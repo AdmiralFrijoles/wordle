@@ -6,7 +6,6 @@ import {fetchFromCache} from "@/lib/cache";
 import {getAppSetting, setAppSetting} from "@/lib/settings-service";
 import {formatISO} from "date-fns";
 import {UTCDate} from "@date-fns/utc";
-import {auth} from "@/lib/auth";
 import {DateOnly} from "@/types";
 import {SETTING_DEFAULT_PUZZLE} from "@/constants/settings";
 
@@ -14,26 +13,37 @@ import {SETTING_DEFAULT_PUZZLE} from "@/constants/settings";
 const defaultTTL: number = 1000 * 60 * 60 * 6;
 
 export async function listPuzzlesForUser(): Promise<Puzzle[]> {
-    const session = await auth();
-    if (!session) {
-        return prisma.puzzle.findMany({
+    // TODO: Filter by user access
+    return listPublicPuzzles();
+}
+
+export async function listPublicPuzzles(): Promise<Puzzle[]> {
+    const cacheKey = `puzzle-list-public`;
+    return await fetchFromCache(
+        cacheKey,
+        () => prisma.puzzle.findMany({
             where: {isPublic: true}
-        });
-    } else {
-        return prisma.puzzle.findMany({
-            where: {isPublic: true} // TODO: Filter by user access
-        });
-    }
+        }),
+        defaultTTL
+    ) ?? [];
 }
 
 export async function listDatesForPuzzle(puzzleId: string): Promise<Date[]> {
-    const results = await prisma.solution.findMany({
-        where: {puzzleId: puzzleId},
-        select: {date: true},
-        orderBy: {date: "asc"}
-    });
+    const cacheKey = `puzzle-dates-${puzzleId}`;
+    const puzzleDates = await fetchFromCache<Date[]>(
+        cacheKey,
+        async () => {
+            const results = await prisma.solution.findMany({
+                where: {puzzleId: puzzleId},
+                select: {date: true},
+                orderBy: {date: "asc"}
+            });
+            return results.map(result => result.date);
+        },
+        defaultTTL
+    );
 
-    return results.map(result => result.date);
+    return puzzleDates ?? [];
 }
 
 export async function getPuzzleBySlug(slug: string): Promise<Puzzle | null> {
@@ -115,30 +125,46 @@ export async function getPuzzleSolution(puzzleId: string, solutionDate: DateOnly
 }
 
 export async function getPuzzleNeighboringSolutions(puzzleId: string, solutionDate: DateOnly): Promise<{previous: Solution | null, next: Solution | null}> {
-    const isoDate = formatISO(new UTCDate(solutionDate.year, solutionDate.month, solutionDate.day));
-    const previousSolution = await prisma.solution.findFirst({
-        where: { puzzleId: puzzleId, date: {lt: isoDate} },
-        orderBy: {date: "desc"}
-    });
-
-    const nextSolution = await prisma.solution.findFirst({
-        where: { puzzleId: puzzleId, date: {gt: isoDate} },
-        orderBy: {date: "asc"}
-    });
-
-    return {
-        previous: previousSolution,
-        next: nextSolution
-    }
+    const cacheKey = `puzzle-neighboring-solutions-${puzzleId}-${solutionDate.year}-${solutionDate.month}-${solutionDate.day}`;
+    return await fetchFromCache(
+        cacheKey,
+        async () => {
+            const isoDate = formatISO(new UTCDate(solutionDate.year, solutionDate.month, solutionDate.day));
+            const previousSolution = await prisma.solution.findFirst({
+                where: { puzzleId: puzzleId, date: {lt: isoDate} },
+                orderBy: {date: "desc"}
+            });
+            const nextSolution = await prisma.solution.findFirst({
+                where: { puzzleId: puzzleId, date: {gt: isoDate} },
+                orderBy: {date: "asc"}
+            });
+            return {
+                previous: previousSolution,
+                next: nextSolution
+            }
+        },
+        defaultTTL
+    ) ?? {
+        previous: null,
+        next: null
+    };
 }
 
 export async function solutionExists(puzzleId: string, solutionDate: DateOnly) {
-    const isoDate = formatISO(new UTCDate(solutionDate.year, solutionDate.month, solutionDate.day));
-    const count = await prisma.solution.count({
-        where: {
-            puzzleId: puzzleId,
-            date: isoDate
-        }
-    });
-    return count > 0;
+    const cacheKey = `solution-exists-${puzzleId}-${solutionDate.year}-${solutionDate.month}-${solutionDate.day}`;
+    return await fetchFromCache(
+        cacheKey,
+        async () => {
+            const isoDate = formatISO(new UTCDate(solutionDate.year, solutionDate.month, solutionDate.day));
+            const count = await prisma.solution.count({
+                where: {
+                    puzzleId: puzzleId,
+                    date: isoDate
+                }
+            });
+            return count > 0;
+        },
+        defaultTTL,
+        true
+    ) ?? false;
 }
