@@ -1,31 +1,32 @@
-﻿// ts-ignore 7017 is used to ignore the error that the global object is not
-// defined in the global scope. This is because the global object is only
-// defined in the global scope in Node.js and not in the browser.
-import Keyv from "keyv";
+﻿import Keyv, {KeyvOptions} from "keyv";
 import KeyvRedis from "@keyv/redis";
-
-const globalForKeyv = global as unknown as { keyv: Keyv }
-
+import {Cacheable} from 'cacheable';
 const useRedis = process.env.REDIS_URL !== undefined;
 
-function create() {
-    const opt = {
+function create(): Cacheable {
+    const opt: KeyvOptions = {
         namespace: "wordle",
         ttl: 5000
     }
 
     if (useRedis) {
-        return new Keyv(new KeyvRedis({
+        const secondary = new Keyv(new KeyvRedis({
             url: process.env.REDIS_URL,
-            database: parseInt(process.env.REDIS_DATABASE ?? "0")
+            database: parseInt(process.env.REDIS_DATABASE ?? "0"),
         }), opt);
+        return new Cacheable({
+            secondary,
+            nonBlocking: true,
+            namespace: opt.namespace,
+            ttl: opt.ttl
+        });
     } else {
-        return new Keyv(opt);
+        return new Cacheable({
+            namespace: opt.namespace,
+            ttl: opt.ttl
+        });
     }
 }
 
-export const keyv = globalForKeyv.keyv || create();
-
-if (process.env.NODE_ENV !== 'production') globalForKeyv.keyv = keyv
-
-export default keyv
+export const cache = create();
+export default cache;
