@@ -20,8 +20,10 @@ export async function fetchFromCache<T>(
     ttl: number | undefined = undefined,
     cacheNulls: boolean = false
 ): Promise<T | null> {
-
     const cachedEncodedValue: Uint8Array | undefined | null = await cache.get<Uint8Array>(key);
+    if (cachedEncodedValue === undefined) {
+        await cache.delete(key);
+    }
     if (cachedEncodedValue) {
         const cached = deserialize<T>(cachedEncodedValue);
         if (cached) {
