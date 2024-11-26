@@ -4,7 +4,6 @@ import {useDisclosure} from "@nextui-org/use-disclosure";
 import HeaderIcon from "@/components/header/HeaderIcon";
 import {UserCircleIcon} from "@heroicons/react/24/outline";
 import BaseModal from "@/components/modal/ModalBase";
-import {Avatar} from "@nextui-org/react";
 import {useSession} from "next-auth/react";
 
 type Props = {
@@ -18,21 +17,15 @@ export default function UserModal({signOutAction}: Props) {
     return (
         <>
             {sessionStatus === "loading" && (
-                <Avatar
-                    className="bg-transparent w-6 h-6"
-                    icon={<UserCircleIcon className="dark:stroke-white w-6 h-6"/>}
-                />
+                <UserCircleIcon className="dark:stroke-white w-6 h-6"/>
             )}
             {sessionStatus === "authenticated" && session && (
                 <>
                     <HeaderIcon tooltipContent="User Menu">
                         <div className="w-6 h-6" onClick={onOpen}>
-                            <Avatar
-                                src={session.user.image ?? undefined}
-                                className="bg-transparent w-full h-full"
-                                icon={<UserCircleIcon className="dark:stroke-white w-full h-full"/>}
-                                showFallback
-                            />
+                            {session?.user?.image ?
+                                <img className="w-6 h-6 rounded-full" src={session.user.image} alt={session.user.name ?? "User"}/> :
+                                <UserCircleIcon className="dark:stroke-white w-6 h-6"/>}
                         </div>
                     </HeaderIcon>
                     <BaseModal title="User" isOpen={isOpen} onOpenChange={onOpenChange}>

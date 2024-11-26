@@ -1,7 +1,6 @@
 ﻿import {UserCircleIcon} from "@heroicons/react/24/outline";
 import HeaderIcon from "@/components/header/HeaderIcon";
 import {auth, signIn, signOut} from "@/lib/auth";
-import {Avatar} from "@nextui-org/react";
 import UserModal from "@/components/modal/UserModal";
 
 export default async function CurrentUser() {
@@ -20,10 +19,7 @@ export default async function CurrentUser() {
             }}>
                 <HeaderIcon tooltipContent="Sign In">
                     <button type="submit">
-                        <Avatar
-                            icon={<UserCircleIcon className="dark:stroke-white w-6 h-6"/>}
-                            className="bg-transparent w-6 h-6"
-                        />
+                        <UserCircleIcon className="dark:stroke-white w-6 h-6"/>
                     </button>
                  </HeaderIcon>
             </form>
