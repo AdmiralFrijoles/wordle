@@ -1,7 +1,7 @@
 ﻿"use server";
 
 import prisma from "@/lib/prisma";
-import {GameStates, IUserPuzzleSolution, PuzzleStats} from "@/types";
+import {DateOnly, GameStates, IUserPuzzleSolution, IUserSolutionDate, PuzzleStats} from "@/types";
 import {Solution, UserSolution, UserSolutionState} from "@prisma/client";
 import {auth} from "@/lib/auth";
 import {buildStats} from "@/lib/stats";
@@ -153,7 +153,6 @@ export async function upsertUserSolution(userSolution: IUserPuzzleSolution): Pro
 
 }
 
-
 export async function getUserPuzzleStats(userId: string, puzzleId: string): Promise<PuzzleStats> {
     const userSolutions = await prisma.userSolution.findMany({
         include: {solution: true},
@@ -168,6 +167,43 @@ export async function getUserPuzzleStats(userId: string, puzzleId: string): Prom
 
     return buildStats(userSolutions.map(userSolution => toUserPuzzleSolution(userSolution, userSolution.solution)));
 }
+
+export async function getUserSolutionDates(puzzleId: string, userId?: string | undefined): Promise<IUserSolutionDate[]> {
+    const session = await auth();
+    if (!userId) userId = session?.user?.id;
+    if (!session) {
+        throw new Error("Not authorized");
+    } else if (session.user?.id !== userId && session.user.role !== "admin") {
+        throw new Error("Not authorized");
+    }
+
+    const results = await prisma.userSolution.findMany({
+        where: {
+            userId: userId,
+            solution: {puzzleId: puzzleId},
+        },
+        select: {
+            solution: {
+                select: {
+                    date: true
+                }
+            },
+            state: true
+        }
+    });
+
+    return results.map(x => {
+        return {
+            date: {
+                year: x.solution.date.getUTCFullYear(),
+                month: x.solution.date.getUTCMonth() + 1,
+                day: x.solution.date.getUTCDate()
+            } as DateOnly,
+            state: toGameState(x.state)
+        }
+    });
+}
+
 
 
 

@@ -47,3 +47,8 @@ export type DateOnly = {
     month: number;
     day: number;
 }
+
+export interface IUserSolutionDate {
+    date: DateOnly;
+    state: keyof typeof GameStates;
+}
