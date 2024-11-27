@@ -2,8 +2,11 @@
 import { traceExporter } from './instrumentation.node';
 
 export function register() {
+    if (process.env.NODE_ENV === "development") {
+        return;
+    }
     registerOTel({
-        serviceName: process.env.OTEL_SERVICE_NAME ?? "wordle-app",
+        serviceName: "wordle-app",
         traceExporter: traceExporter
     });
 }
