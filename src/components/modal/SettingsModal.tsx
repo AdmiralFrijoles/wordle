@@ -58,7 +58,7 @@ export default function SettingsModal() {
                         {changelogModal &&
                             <Button
                                 onPress={changelogModal.onOpenChange}
-                                className="min-w-24 h-9 flex shrink-0 rounded-md p-1 bg-indigo-600 hover:bg-indigo-700"
+                                className="min-w-24 h-9 flex shrink-0 rounded-md p-1 bg-indigo-600 hover:bg-indigo-700 text-white"
                             >
                             What&#39;s New
                             </Button>}

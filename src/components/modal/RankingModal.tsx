@@ -70,7 +70,9 @@ export default function RankingModal({appTitle}: Props) {
             setHasNextGame(tomorrowHasSolution);
         }
 
-        if (session?.user?.id && currentPuzzle?.id) {
+        if (!currentPuzzle?.id) return;
+
+        if (session?.user?.id) {
             setPuzzleStats(await getUserPuzzleStats(session.user.id, currentPuzzle.id));
         } else {
             const userSolutions: IUserPuzzleSolution[] = [];
@@ -81,6 +83,7 @@ export default function RankingModal({appTitle}: Props) {
                     if (!localStorageValue) continue;
                     const userSolution = JSON.parse(localStorageValue) as IUserPuzzleSolution;
                     if (userSolution.state === "Unsolved") continue;
+                    if (userSolution.puzzleId !== currentPuzzle.id) continue;
                     userSolutions.push(userSolution);
                 }
             }
