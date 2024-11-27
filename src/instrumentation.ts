@@ -3,7 +3,7 @@ import { traceExporter } from './instrumentation.node';
 
 export function register() {
     registerOTel({
-        serviceName: 'wordle-app',
+        serviceName: process.env.OTEL_SERVICE_NAME ?? "wordle-app",
         traceExporter: traceExporter
     });
 }
