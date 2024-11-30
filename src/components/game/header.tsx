@@ -38,7 +38,7 @@ export function GamePanelHeader({currentPuzzle, currentSolution, previousPuzzleD
                         Solution<br/>{dateFormatter.format(previousPuzzleDate.toDate(userTimeZone))}</p>)}>
                         <Link
                             href={`/${currentPuzzle.slug}/${format(previousPuzzleDate.toDate(userTimeZone), "yyyy/MM/dd")}`}>
-                            <ChevronLeftIcon className="w-5"/>
+                            <ChevronLeftIcon className="w-5 -ml-5"/>
                         </Link>
                     </Tooltip>
                 </div>}
@@ -48,7 +48,7 @@ export function GamePanelHeader({currentPuzzle, currentSolution, previousPuzzleD
                         Solution<br/>{dateFormatter.format(nextPuzzleDate.toDate(userTimeZone))}</p>)}>
                         <Link
                             href={`/${currentPuzzle.slug}/${format(nextPuzzleDate.toDate(userTimeZone), "yyyy/MM/dd")}`}>
-                            <ChevronRightIcon className="w-5"/>
+                            <ChevronRightIcon className="w-5 -mr-5"/>
                         </Link>
                     </Tooltip>
                 </div>}
