@@ -21,7 +21,7 @@ export default function PuzzleLinkButton({link}: Props) {
     }
 
     return (
-        <div onClick={handleCopyLink}>
+        <div onClick={handleCopyLink} className="-mr-6">
             <Tooltip content="Copy link to this puzzle." placement="bottom">
                 <LinkIcon className="dark:stroke-white cursor-pointer animated ml-2 h-4 w-4 stroke-[2.5px]"/>
             </Tooltip>
