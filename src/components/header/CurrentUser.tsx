@@ -26,7 +26,9 @@ export default async function CurrentUser() {
     )
     } else {
         return (
-            <UserModal signOutAction={signOutUser}/>
+            <UserModal
+                userImage={session.user.image}
+                signOutAction={signOutUser}/>
         )
     }
 }

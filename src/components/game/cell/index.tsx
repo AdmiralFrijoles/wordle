@@ -2,6 +2,7 @@
 import {useSettings} from "@/providers/SettingsProvider";
 import classnames from "classnames";
 import {REVEAL_TIME_MS} from "@/constants";
+import {Skeleton} from "@nextui-org/react";
 
 type Props = {
     value?: string;
@@ -9,9 +10,10 @@ type Props = {
     position?: number;
     isRevealing?: boolean;
     isCompleted?: boolean;
+    isLoading?: boolean | undefined;
 };
 
-export default function GameGridCell({value, status, position = 0, isRevealing, isCompleted}: Props) {
+export default function GameGridCell({value, status, position = 0, isRevealing, isCompleted, isLoading}: Props) {
     const settings = useSettings();
 
     const isFilled = value && !isCompleted
@@ -41,10 +43,15 @@ export default function GameGridCell({value, status, position = 0, isRevealing, 
     )
 
     return (
-        <div className={classes} style={{animationDelay}}>
-            <div className="letter-container" style={{animationDelay}}>
-                {value}
-            </div>
-        </div>
+        <>
+            {isLoading ?
+                <Skeleton className="skeleton xxshort:w-11 xxshort:h-11 short:w-12 short:h-12 w-14 h-14 flex items-center justify-center mx-0.5 rounded"/> :
+                <div className={classes} style={{animationDelay}}>
+                    <div className="letter-container" style={{animationDelay}}>
+                        {value}
+                    </div>
+                </div>
+            }
+        </>
     )
 }
