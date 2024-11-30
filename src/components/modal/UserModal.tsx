@@ -8,17 +8,22 @@ import {useSession} from "next-auth/react";
 
 type Props = {
     signOutAction: () => void;
+    userImage: string | null | undefined;
 }
 
-export default function UserModal({signOutAction}: Props) {
+export default function UserModal({signOutAction, userImage}: Props) {
     const {data: session, status: sessionStatus} = useSession();
     const {isOpen, onOpen, onOpenChange} = useDisclosure();
 
     return (
         <>
             {sessionStatus === "loading" && (
-                <UserCircleIcon className="dark:stroke-white w-6 h-6"/>
-            )}
+                <div className="w-6 h-6" onClick={onOpen}>
+                    {userImage ?
+                        <img className="w-6 h-6 rounded-full" src={userImage} alt="User"/> :
+                        <UserCircleIcon className="dark:stroke-white w-6 h-6"/>}
+                </div>
+                )}
             {sessionStatus === "authenticated" && session && (
                 <>
                     <HeaderIcon tooltipContent="User Menu">

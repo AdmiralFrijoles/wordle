@@ -6,7 +6,7 @@ import {useCurrentPuzzle} from "@/providers/PuzzleProvider";
 import {useEffect, useRef, useState} from "react";
 import BaseModal from "@/components/modal/ModalBase";
 import {useDisclosure} from "@nextui-org/use-disclosure";
-import {Calendar} from "@nextui-org/react";
+import {Calendar, Skeleton} from "@nextui-org/react";
 import {DateValue, getLocalTimeZone, today, CalendarDate} from "@internationalized/date";
 import {useAsync} from "react-use";
 import {listDatesForPuzzle} from "@/lib/puzzle-service";
@@ -165,7 +165,7 @@ export default function ArchiveModal() {
                     </HeaderIcon>
 
                     <BaseModal title="Choose Solution Date" isOpen={isOpen} onOpenChange={onOpenChange}>
-                        {isLoadingDates ? <p>Loading...</p> :
+                        <Skeleton isLoaded={!isLoadingDates} className="skeleton rounded-md">
                             <Calendar
                                 ref={calendarRef}
                                 aria-label="Available Puzzle Solution Dates"
@@ -188,7 +188,7 @@ export default function ArchiveModal() {
                                     content: "bg-white dark:bg-transparent"
                                 }}
                             />
-                        }
+                        </Skeleton>
                     </BaseModal>
                 </>
             )}

@@ -17,6 +17,7 @@ type Props = {
     solution: string;
     rows: Row[];
     isRevealing?: boolean;
+    disabled?: boolean | undefined;
 };
 
 export default function Keyboard({
@@ -25,7 +26,8 @@ export default function Keyboard({
                                      onDelete,
                                      solution,
                                      rows,
-                                     isRevealing
+                                     isRevealing,
+                                     disabled,
 }: Props) {
     const keyboardRowCount = keyboardLayout.length;
     const statuses = getKeyboardGuessStatuses(solution, rows);
@@ -54,16 +56,17 @@ export default function Keyboard({
             <div key={rowIndex}
                  className={rowIndex < keyboardRowCount - 1 ? "mb-1 flex justify-center" : "flex justify-center"}>
                 {(rowIndex === keyboardRowCount - 1) &&
-                <Key value="ENTER" onClick={onSubmit} />}
+                <Key value="ENTER" onClick={onSubmit} disabled={disabled} />}
                 {row.map(key => (
                     <Key key={key}
+                         disabled={disabled}
                          value={key}
                          onClick={onLetterClick}
                          status={statuses[key]}
                          isRevealing={isRevealing}/>
                 ))}
                 {(rowIndex === keyboardRowCount - 1) &&
-                <Key value="DELETE" onClick={onDelete}>
+                <Key value="DELETE" onClick={onDelete} disabled={disabled}>
                     <BackspaceIcon className="h-[1.25rem] w-[1.3rem] mt-[0.1rem] stroke-2"/>
                 </Key>}
             </div>

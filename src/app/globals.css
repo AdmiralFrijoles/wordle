@@ -50,14 +50,6 @@ a {
   text-decoration: none;
 }
 
-.splash-screen {
-  z-index: 1000;
-  position: fixed;
-  width: 100vw;
-  height: 100vh;
-  background: white;
-}
-
 .navbar {
 }
 
@@ -114,6 +106,12 @@ a {
   animation-fill-mode: backwards;
 }
 
+@layer components {
+  .skeleton {
+    @apply bg-slate-100 dark:bg-slate-700 !important;
+    @apply rounded-sm;
+  }
+}
 
 .jiggle {
   animation: jiggle linear;

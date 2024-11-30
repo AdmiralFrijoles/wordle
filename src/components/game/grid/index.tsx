@@ -6,9 +6,10 @@ type Props = {
     isRevealing?: boolean;
     currentRowIndex: number;
     currentRowClassName: string;
+    isLoading?: boolean | undefined;
 };
 
-export default function GameGrid({rows, isRevealing, currentRowIndex, currentRowClassName}: Props) {
+export default function GameGrid({rows, isRevealing, currentRowIndex, currentRowClassName, isLoading}: Props) {
     return (
         <div className="flex grow flex-col justify-center pb-6 short:pb-2">
             {rows.map((play, rowIndex) => {
@@ -18,6 +19,7 @@ export default function GameGrid({rows, isRevealing, currentRowIndex, currentRow
                         {play.map((guess, idx) => (
                             <GameGridCell
                                 key={idx}
+                                isLoading={isLoading}
                                 value={guess.value}
                                 status={guess.status}
                                 position={idx}

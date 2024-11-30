@@ -20,6 +20,7 @@ import ShareButton from "@/components/sharebutton";
 import {asDateOnly} from "@/lib/date-util";
 import {solutionExists} from "@/lib/puzzle-service";
 import {useGlobalModal} from "@/providers/GlobalModalProvider";
+import {Skeleton} from "@nextui-org/react";
 
 type Props = {
     appTitle: string
@@ -101,63 +102,66 @@ export default function RankingModal({appTitle}: Props) {
             </HeaderIcon>
 
             <BaseModal title="Statistics" isOpen={isOpen} onOpenChange={onOpenChange}>
-                {isLoading ?
-                    (<p>Loading...</p>) :
-                    (<div className="text-center">
+                <div className="text-center">
+                    <Skeleton className="skeleton" isLoaded={!isLoading}>
                         <StatBar puzzleStats={puzzleStats}/>
+                    </Skeleton>
+                    <Skeleton className="skeleton" isLoaded={!isLoading}>
                         {puzzleStats.totalGames > 0 && (
                             <>
-                            <h4 className="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">
-                                Guess Distribution
-                            </h4>
-                            <Histogram
-                                isLatestGame={isLatestGame}
-                                puzzleStats={puzzleStats}
-                                isGameWon={currentUserSolution?.state === "Win"}
-                                numberOfGuessesMade={currentUserSolution?.guesses.length ?? 0}
-                            />
-                            {currentSolution && currentUserSolution && currentUserSolution.state !== "Unsolved" && (
-                                <div>
-                                    <div
-                                        className="items-center justify-center text-center dark:text-white">
-                                        <div className="inline-block w-full text-left">
-                                            {(isLatestGame && hasNextGame) && (
-                                                <div>
-                                                    <strong>New word in:&nbsp;</strong>
-                                                    <Countdown
-                                                        className="inline-flex text-lg font-medium text-gray-900 dark:text-gray-100"
-                                                        date={tomorrow.toDate(userTimeZone)}
-                                                        daysInHours={true}
-                                                    />
-                                                </div>
-                                            )}
-                                            {(!isLatestGame && solutionDate) && (
-                                                <div className="mt-2 inline-flex w-full">
-                                                    <ClockIcon
-                                                        className="mr-1 mt-2 h-5 w-5 stroke-black dark:stroke-white"/>
-                                                    <div className="inline-flex mt-1 ml-1 text-center text-sm sm:text-base">
-                                                        <strong>Game date:&nbsp;</strong>
-                                                        <p>{dateFormatter.format(solutionDate.toDate(userTimeZone))}</p>
+                                <h4 className="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                    Guess Distribution
+                                </h4>
+                                <Histogram
+                                    isLatestGame={isLatestGame}
+                                    puzzleStats={puzzleStats}
+                                    isGameWon={currentUserSolution?.state === "Win"}
+                                    numberOfGuessesMade={currentUserSolution?.guesses.length ?? 0}
+                                />
+                                {currentSolution && currentUserSolution && currentUserSolution.state !== "Unsolved" && (
+                                    <div>
+                                        <div
+                                            className="items-center justify-center text-center dark:text-white">
+                                            <div className="inline-block w-full text-left">
+                                                {(isLatestGame && hasNextGame) && (
+                                                    <div>
+                                                        <strong>New word in:&nbsp;</strong>
+                                                        <Countdown
+                                                            className="inline-flex text-lg font-medium text-gray-900 dark:text-gray-100"
+                                                            date={tomorrow.toDate(userTimeZone)}
+                                                            daysInHours={true}
+                                                        />
                                                     </div>
-                                                </div>
-                                            )}
+                                                )}
+                                                {(!isLatestGame && solutionDate) && (
+                                                    <div className="mt-2 inline-flex w-full">
+                                                        <ClockIcon
+                                                            className="mr-1 mt-2 h-5 w-5 stroke-black dark:stroke-white"/>
+                                                        <div
+                                                            className="inline-flex mt-1 ml-1 text-center text-sm sm:text-base">
+                                                            <strong>Game date:&nbsp;</strong>
+                                                            <p>{dateFormatter.format(solutionDate.toDate(userTimeZone))}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="w-full mt-4">
+                                            <ShareButton appTitle={appTitle}
+                                                         currentPuzzle={currentPuzzle}
+                                                         currentUserSolution={currentUserSolution}
+                                                         currentSolution={currentSolution}
+                                                         isHighContrast={settings.isHighContrast}
+                                                         isHardMode={settings.isHardMode}
+                                                         isDarkMode={settings.isDarkMode}
+                                            />
                                         </div>
                                     </div>
-                                    <div className="w-full mt-4">
-                                        <ShareButton appTitle={appTitle}
-                                                     currentPuzzle={currentPuzzle}
-                                                     currentUserSolution={currentUserSolution}
-                                                     currentSolution={currentSolution}
-                                                     isHighContrast={settings.isHighContrast}
-                                                     isHardMode={settings.isHardMode}
-                                                     isDarkMode={settings.isDarkMode}
-                                        />
-                                    </div>
-                                </div>
-                            )}
+                                )}
                             </>
                         )}
-                    </div>)}
+                    </Skeleton>
+                </div>
             </BaseModal>
         </>
     )
