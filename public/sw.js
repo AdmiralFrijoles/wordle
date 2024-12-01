@@ -1,32 +1,11 @@
-﻿//import { defaultCache } from "@serwist/next/worker";
-import {NetworkOnly, PrecacheEntry, SerwistGlobalConfig} from "serwist";
-import { Serwist } from "serwist";
-
-declare global {
-    interface WorkerGlobalScope extends SerwistGlobalConfig {
-        __SW_MANIFEST: (PrecacheEntry | string)[] | undefined;
-    }
-}
-
-declare const self: ServiceWorkerGlobalScope;
-
-const serwist = new Serwist({
-    precacheEntries: self.__SW_MANIFEST,
-    skipWaiting: true,
-    clientsClaim: true,
-    navigationPreload: true,
-    runtimeCaching: [{
-        matcher: () => true,
-        handler: new NetworkOnly()
-    }],
-    //runtimeCaching: defaultCache,
-});
-
-serwist.addEventListeners();
-
-const version = "%%APP_VERSION%%" // increase for new version
+﻿const version = "%%APP_VERSION%%" // increase for new version
 const staticCacheName = version + "_pwa-static";
 const dynamicCacheName = version + "_pwa-dynamic";
+
+self.addEventListener('install', function() {
+    console.log('Installing ServiceWorker and cache static assets');
+    self.skipWaiting();
+})
 
 self.addEventListener('activate', function(event) {
     event.waitUntil(

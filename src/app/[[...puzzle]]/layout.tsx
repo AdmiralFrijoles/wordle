@@ -12,6 +12,7 @@ import {fileExists} from "next/dist/lib/file-exists";
 import {APP_VERSION} from "@/constants";
 import path from "node:path";
 import {VersionChecker} from "@/components/VersionChecker";
+import {ServiceWorker} from "@/components/ServiceWorker";
 
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -228,6 +229,7 @@ export default async function RootLayout({children}: Readonly<{
         <html lang="en" suppressHydrationWarning={true} className="dark">
         <body>
         <Providers>
+            <ServiceWorker/>
             <div className="flex h-full flex-col">
                 <Toaster position="top-center"/>
                 <div className="flex flex-col h-screen">

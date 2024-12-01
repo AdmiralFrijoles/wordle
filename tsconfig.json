@@ -18,10 +18,6 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "types": [
-      // This allows Serwist to type `window.serwist`.
-      "@serwist/next/typings"
-    ],
     "plugins": [
       {
         "name": "next"
