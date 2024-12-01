@@ -8,7 +8,9 @@ export default async function CurrentUser() {
 
     async function signOutUser() {
         "use server";
-        await signOut();
+        await signOut({
+            redirect: false,
+        });
     }
 
     if (!session?.user) {
