@@ -1,5 +1,5 @@
-﻿import { defaultCache } from "@serwist/next/worker";
-import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
+﻿//import { defaultCache } from "@serwist/next/worker";
+import {NetworkOnly, PrecacheEntry, SerwistGlobalConfig} from "serwist";
 import { Serwist } from "serwist";
 
 declare global {
@@ -15,7 +15,11 @@ const serwist = new Serwist({
     skipWaiting: true,
     clientsClaim: true,
     navigationPreload: true,
-    runtimeCaching: defaultCache,
+    runtimeCaching: [{
+        matcher: () => true,
+        handler: new NetworkOnly()
+    }],
+    //runtimeCaching: defaultCache,
 });
 
 serwist.addEventListeners();
