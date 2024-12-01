@@ -5,3 +5,4 @@ export const SETTING_APP_DESCRIPTION: IAppSetting<string> = {key: "APP_DESCRIPTI
 
 export const SETTING_DEFAULT_PUZZLE: IAppSetting<string> = {key: "DEFAULT_PUZZLE_SLUG"};
 
+export const SETTING_DISCORD_DOJO_ID: IAppSetting<string> = {key: "DISCORD_DOJO_ID"};
