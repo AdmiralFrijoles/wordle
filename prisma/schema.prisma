@@ -17,7 +17,7 @@ model AppSetting {
 model User {
   id            String          @id @default(auto()) @map("_id") @db.ObjectId
   name          String?
-  email         String?         @unique
+  email         String?         @unique @default(uuid())
   emailVerified DateTime?
   image         String?
   role          String?         @default("user")
