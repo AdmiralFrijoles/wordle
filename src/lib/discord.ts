@@ -1,7 +1,7 @@
 ﻿"use server";
 
-import { REST } from '@discordjs/rest';
-import {RESTGetAPICurrentUserGuildsResult, Routes} from 'discord-api-types/v10';
+import {REST} from '@discordjs/rest';
+import {RESTGetAPICurrentUserGuildsResult, RESTGetAPICurrentUserResult, Routes} from 'discord-api-types/v10';
 import {auth} from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import {getAppSetting} from "@/lib/settings-service";
@@ -17,7 +17,13 @@ export interface DiscordPartialGuild {
     permissions: string;
 }
 
-export async function getCurrentUserGuilds(): Promise<DiscordPartialGuild[]> {
+export interface DiscordPartialUserProfile {
+    id: string;
+    username: string;
+    avatar: string | null;
+}
+
+async function getCurrentUserRestClient(): Promise<REST | null> {
     const session = await auth();
     if (!session?.user?.id) {
         throw new Error("Not authorized");
@@ -36,13 +42,18 @@ export async function getCurrentUserGuilds(): Promise<DiscordPartialGuild[]> {
 
     if (!account?.access_token) {
         console.log("No discord user account with access token found.")
-        return [];
+        return null;
     }
 
-    const rest = new REST({ version: '10', authPrefix: 'Bearer' }).setToken(account.access_token);
+    return new REST({ version: '10', authPrefix: 'Bearer' }).setToken(account.access_token);
+}
+
+export async function getCurrentUserGuilds(): Promise<DiscordPartialGuild[]> {
+    const rest = await getCurrentUserRestClient();
+    if (!rest) return [];
 
     try {
-        const response: RESTGetAPICurrentUserGuildsResult = await rest.get(Routes.userGuilds())
+        const response = await rest.get(Routes.userGuilds())
             .then(r => r as RESTGetAPICurrentUserGuildsResult);
         return response.map(guild => {
             return {
@@ -68,5 +79,35 @@ export async function getCurrentUserDojoGuild(): Promise<DiscordPartialGuild | n
         return userGuilds.find(x => x.id === dojoGuildId) ?? null;
     }
     return null;
+}
+
+export async function getCurrentUserProfile(): Promise<DiscordPartialUserProfile | null> {
+    const rest = await getCurrentUserRestClient();
+    if (!rest) return null;
+
+    try {
+        const response = await rest.get(Routes.user("@me"))
+            .then(r => r as RESTGetAPICurrentUserResult);
+
+        let image_url: string | null;
+        if (response.avatar === null) {
+            const defaultAvatarNumber =
+                response.discriminator === "0"
+                    ? Number(BigInt(response.id) >> BigInt(22)) % 6
+                    : parseInt(response.discriminator) % 5
+            image_url = rest.cdn.defaultAvatar(defaultAvatarNumber);
+        } else {
+            image_url = rest.cdn.avatar(response.id, response.avatar);
+        }
+
+        return {
+            id: response.id,
+            username: response.global_name ?? response.username,
+            avatar: image_url
+        }
+    } catch (e) {
+        console.error(e);
+        return null;
+    }
 }
 
