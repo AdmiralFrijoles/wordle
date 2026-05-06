@@ -29,7 +29,7 @@
     "@opentelemetry/sdk-logs": "^0.55.0",
     "@prisma/client": "6",
     "@vercel/otel": "^1.10.0",
-    "axios": "^1.8.2",
+    "axios": "^1.12.0",
     "cacheable": "^1.8.5",
     "classnames": "^2.5.1",
     "date-fns": "^4.1.0",
