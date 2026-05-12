@@ -30,8 +30,14 @@ export function DiscordGuildProvider({children}: Props) {
         }
 
         async function getGuild() {
-            const dojoGuild = await getCurrentUserDojoGuild();
-            setGuild(dojoGuild);
+            try {
+                const dojoGuild = await getCurrentUserDojoGuild();
+                setGuild(dojoGuild);
+            } catch {
+                // Server action may reject (e.g. Discord re-auth required).
+                // The header surfaces the re-auth CTA; here we just hide the guild.
+                setGuild(null);
+            }
         }
     }, [status]);
 

@@ -17,6 +17,35 @@ declare module "next-auth" {
 
 export const {handlers, signIn, signOut, auth} = NextAuth({
     adapter: PrismaAdapter(prisma),
+    events: {
+        // Auth.js does NOT update the Account row when a user re-signs-in
+        // with an existing OAuth account (see @auth/core handle-login.ts).
+        // Without this, "Sign In Again" yields fresh tokens from Discord
+        // but we keep reading the stale ones → permanent invalid_grant.
+        async signIn({account}) {
+            if (!account || account.provider !== "discord") return;
+            await prisma.account.update({
+                where: {
+                    provider_providerAccountId: {
+                        provider: account.provider,
+                        providerAccountId: account.providerAccountId,
+                    },
+                },
+                data: {
+                    access_token: account.access_token,
+                    refresh_token: account.refresh_token,
+                    expires_at: account.expires_at,
+                    token_type: account.token_type,
+                    scope: account.scope,
+                    id_token: account.id_token,
+                },
+            }).catch((e) => {
+                // Row may not exist yet on the very first sign-in (linkAccount
+                // hasn't run); that path persists tokens itself, so ignore.
+                if ((e as { code?: string }).code !== "P2025") throw e;
+            });
+        },
+    },
     callbacks: {
         jwt({token, user}) {
             if (user) { // user is only available on first sign-in

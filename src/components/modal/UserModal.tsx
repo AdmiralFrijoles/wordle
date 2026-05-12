@@ -36,8 +36,8 @@ export default function UserModal({signOutAction, userImage}: Props) {
                 <>
                     <HeaderIcon tooltipContent="User Menu">
                         <div className="w-6 h-6" onClick={onOpen}>
-                            {session?.user?.image ?
-                                <Image className="w-6 h-6 rounded-full" src={session.user.image} alt={session.user.name ?? "User"} width="24" height="24"/> :
+                            {userImage ?
+                                <Image className="w-6 h-6 rounded-full" src={userImage} alt={session.user.name ?? "User"} width="24" height="24"/> :
                                 <UserCircleIcon className="dark:stroke-white w-6 h-6"/>}
                         </div>
                     </HeaderIcon>
