@@ -8,7 +8,7 @@ import {getAppSetting} from "@/lib/settings-service";
 import {SETTING_APP_DESCRIPTION, SETTING_APP_TITLE} from "@/constants/settings";
 import Footer from "@/components/footer";
 import ChangelogModal from "@/components/modal/ChangelogModal";
-import {fileExists} from "next/dist/lib/file-exists";
+import {existsSync} from "node:fs";
 import {APP_VERSION} from "@/constants";
 import path from "node:path";
 import {VersionChecker} from "@/components/VersionChecker";
@@ -223,7 +223,7 @@ export default async function RootLayout({children}: Readonly<{
 }>) {
 
     const changelogFilePath = path.resolve(`./public/changelog/${APP_VERSION}.md`);
-    const hasChangelog = await fileExists(changelogFilePath);
+    const hasChangelog = existsSync(changelogFilePath);
 
     return (
         <html lang="en" suppressHydrationWarning={true} className="dark">

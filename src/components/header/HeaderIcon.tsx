@@ -1,4 +1,6 @@
-﻿import React from "react";
+﻿"use client";
+
+import React from "react";
 import {Tooltip} from "@heroui/react";
 
 type HeaderIconProps = {

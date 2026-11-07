@@ -1,4 +1,6 @@
-﻿import React from "react";
+﻿"use client";
+
+import React from "react";
 import {HeroUIProvider} from "@heroui/react";
 import {SettingsProvider} from "@/providers/SettingsProvider";
 import {CurrentPuzzleProvider} from "@/providers/PuzzleProvider";

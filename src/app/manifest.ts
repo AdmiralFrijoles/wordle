@@ -1,29 +1,9 @@
 ﻿import {MetadataRoute} from "next";
-import {getAppSetting} from "@/lib/settings-service";
-import {SETTING_APP_DESCRIPTION, SETTING_APP_TITLE} from "@/constants/settings";
-import type { InferGetServerSidePropsType, GetServerSideProps } from 'next'
 
-type Settings = {
-    title: string
-    description: string
-}
-
-export const getServerSideProps = (async () => {
-    const title = await getAppSetting<string>(SETTING_APP_TITLE);
-    const description = await getAppSetting<string>(SETTING_APP_DESCRIPTION);
-
-    const settings = {
-        title: title ?? "Wordle",
-        description: description ?? ""
-    }
-
-    return { props: {settings} }
-}) satisfies GetServerSideProps<{ settings: Settings }>
-
-export default async function manifest(props: InferGetServerSidePropsType<typeof getServerSideProps>): Promise<MetadataRoute.Manifest> {
+export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: props?.settings?.title ?? "Wordle",
-        description: props?.settings?.description ?? "",
+        name: "Wordle",
+        description: "",
         start_url: "/",
         display: "standalone",
         theme_color: "#0f172a",
