@@ -108,6 +108,8 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
         strategy: "jwt"
     },
     providers: [Discord({
+        // Discord sends an "iss" callback parameter. Without this, Auth.js expects its "https://authjs.dev" placeholder and rejects the callback.
+        issuer: "https://discord.com",
         // Do not request email scope, but do request guilds so we can check who is in the Dojo.
         authorization: "https://discord.com/api/oauth2/authorize?scope=identify+guilds",
         profile: (profile) => {
