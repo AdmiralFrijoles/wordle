@@ -37,7 +37,6 @@ export default function ChangelogModal() {
             const file = await unified()
                 .use(remarkParse)
                 .use(remarkRehype)
-                // @ts-expect-error TS2345
                 .use(rehypeReact, production)
                 .process(markdown);
             setContent(file.result);

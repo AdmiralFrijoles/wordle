@@ -35,7 +35,7 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
     const [gameState, setGameState] = useState<keyof typeof GameStates>("Unsolved");
     const [isRevealing, setIsRevealing] = useState(false)
     const [alertId, setAlertId] = useState<string | undefined>();
-    const timer = useRef<NodeJS.Timeout>();
+    const timer = useRef<NodeJS.Timeout>(undefined);
     const [currentRowClass, setCurrentRowClass] = useState("");
     const [isUsingHardMode, setIsUsingHardMode] = useState(false);
     const [isJustCompleted, setIsJustCompleted] = useState(false);
