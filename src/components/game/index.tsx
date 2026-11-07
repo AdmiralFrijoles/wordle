@@ -13,7 +13,7 @@ import {upsertUserSolution} from "@/lib/user-service";
 import {useSettings} from "@/providers/SettingsProvider";
 import {useCurrentPuzzle} from "@/providers/PuzzleProvider";
 import {findFirstUnusedReveal, getGuessRows, setRowGuessStatuses} from "@/lib/guesses";
-import {Tooltip} from "@nextui-org/tooltip";
+import {Tooltip} from "@nextui-org/react";
 import {asDateOnly} from "@/lib/date-util";
 import {useGlobalModal} from "@/providers/GlobalModalProvider";
 

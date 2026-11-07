@@ -3,12 +3,11 @@
 import {PuzzlePieceIcon} from "@heroicons/react/24/outline";
 import HeaderIcon from "@/components/header/HeaderIcon";
 import BaseModal from "@/components/modal/ModalBase";
-import {useDisclosure} from "@nextui-org/use-disclosure";
+import {useDisclosure, Card, CardBody, CardHeader, Skeleton} from "@nextui-org/react";
 import {useAsync} from "react-use";
 import {listPuzzlesForUser} from "@/lib/puzzle-service";
 import {useState} from "react";
 import {Puzzle} from "@prisma/client";
-import {Card, CardBody, CardHeader, Skeleton} from "@nextui-org/react";
 import {useCurrentPuzzle} from "@/providers/PuzzleProvider";
 import Link from "next/link";
 

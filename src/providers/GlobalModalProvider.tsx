@@ -1,7 +1,9 @@
 ﻿"use client";
 
 import {createContext, useContext, useState} from "react";
-import {UseDisclosureReturn} from "@nextui-org/use-disclosure";
+import {useDisclosure} from "@nextui-org/react";
+
+type UseDisclosureReturn = ReturnType<typeof useDisclosure>;
 
 type Props = {
     children: React.ReactNode

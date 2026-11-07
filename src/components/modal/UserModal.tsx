@@ -1,11 +1,10 @@
 ﻿"use client";
 
-import {useDisclosure} from "@nextui-org/use-disclosure";
+import {useDisclosure, Button, Image} from "@nextui-org/react";
 import HeaderIcon from "@/components/header/HeaderIcon";
 import {UserCircleIcon} from "@heroicons/react/24/outline";
 import BaseModal from "@/components/modal/ModalBase";
 import {useSession} from "next-auth/react";
-import {Button, Image} from "@nextui-org/react";
 import {useDiscordGuild} from "@/providers/DiscordGuildProvider";
 
 type Props = {

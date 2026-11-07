@@ -1,5 +1,5 @@
 ﻿import React from "react";
-import {Tooltip} from "@nextui-org/tooltip";
+import {Tooltip} from "@nextui-org/react";
 
 type HeaderIconProps = {
     children: React.ReactNode;
