@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import {useGlobalModal} from "@/providers/GlobalModalProvider";
-import {useDisclosure} from "@nextui-org/react";
+import {useDisclosure} from "@heroui/react";
 import BaseModal from "@/components/modal/ModalBase";
 import {APP_VERSION, APP_RELEASE_DATE} from "@/constants"
 import {DateFormatter, getLocalTimeZone, parseDate} from "@internationalized/date";

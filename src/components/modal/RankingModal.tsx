@@ -3,7 +3,7 @@
 import {ChartBarIcon, ClockIcon} from "@heroicons/react/24/outline";
 import HeaderIcon from "@/components/header/HeaderIcon";
 import BaseModal from "@/components/modal/ModalBase";
-import {useDisclosure, Skeleton} from "@nextui-org/react";
+import {useDisclosure, Skeleton} from "@heroui/react";
 import StatBar from "@/components/statbar";
 import {useCurrentPuzzle} from "@/providers/PuzzleProvider";
 import {IUserPuzzleSolution, PuzzleStats} from "@/types";

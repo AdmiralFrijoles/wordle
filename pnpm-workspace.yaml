@@ -1,11 +1,12 @@
 allowBuilds:
+  '@heroui/shared-utils': true
   '@prisma/client': true
   '@prisma/engines': true
   prisma: true
   sharp: true
 
 publicHoistPattern:
-  - '*@nextui-org/*'
+  - '*@heroui/*'
 
 overrides:
   '@internationalized/date': ^3.12.4

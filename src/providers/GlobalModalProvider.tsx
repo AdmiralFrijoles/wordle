@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import {createContext, useContext, useState} from "react";
-import {useDisclosure} from "@nextui-org/react";
+import {useDisclosure} from "@heroui/react";
 
 type UseDisclosureReturn = ReturnType<typeof useDisclosure>;
 

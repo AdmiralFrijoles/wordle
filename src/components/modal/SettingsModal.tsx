@@ -2,7 +2,7 @@
 
 import {Cog6ToothIcon} from "@heroicons/react/24/outline";
 import HeaderIcon from "@/components/header/HeaderIcon";
-import {useDisclosure, Button} from "@nextui-org/react";
+import {useDisclosure, Button} from "@heroui/react";
 import BaseModal from "@/components/modal/ModalBase";
 import SettingsToggle from "@/components/settings/SettingsToggle";
 import {useSettings} from "@/providers/SettingsProvider";

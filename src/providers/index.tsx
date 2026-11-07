@@ -1,5 +1,5 @@
 ﻿import React from "react";
-import {NextUIProvider} from "@nextui-org/react";
+import {HeroUIProvider} from "@heroui/react";
 import {SettingsProvider} from "@/providers/SettingsProvider";
 import {CurrentPuzzleProvider} from "@/providers/PuzzleProvider";
 import {SessionProvider} from "next-auth/react";
@@ -8,7 +8,7 @@ import {DiscordGuildProvider} from "@/providers/DiscordGuildProvider";
 
 export function Providers({children}: {children: React.ReactNode}) {
     return (
-        <NextUIProvider>
+        <HeroUIProvider>
         <SessionProvider>
         <GlobalModalProvider>
         <CurrentPuzzleProvider>
@@ -20,6 +20,6 @@ export function Providers({children}: {children: React.ReactNode}) {
         </CurrentPuzzleProvider>
         </GlobalModalProvider>
         </SessionProvider>
-        </NextUIProvider>
+        </HeroUIProvider>
     )
 }

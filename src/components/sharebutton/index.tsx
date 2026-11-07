@@ -9,7 +9,7 @@ import {
     DropdownMenu,
     DropdownTrigger,
     SharedSelection
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {ChevronDownIcon, ShareIcon} from "@heroicons/react/24/outline";
 import {alertError, alertSuccess} from "@/lib/alerts";
 import {IUserPuzzleSolution} from "@/types";
@@ -82,7 +82,7 @@ export default function ShareButton(props: Props) {
 
     return (
         <ButtonGroup variant="flat" fullWidth={true}>
-            <Button className="flex w-full justify-start items-center rounded-l-md border border-transparent bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-base"
+            <Button className="flex w-full justify-start items-center rounded-l-md border border-transparent bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white shadow-xs hover:bg-indigo-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-base"
                     onPress={handleShare}
             >
                 <ShareIcon className="justify-start mr-2 h-6 w-6 cursor-pointer dark:stroke-white"/>
@@ -91,7 +91,7 @@ export default function ShareButton(props: Props) {
             <Dropdown placement="bottom-end">
                 <DropdownTrigger>
                     <Button
-                        className="w-20 items-center justify-center rounded-r-md border border-transparent border-l-1 border-l-solid border-l-red bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-base"
+                        className="w-20 items-center justify-center rounded-r-md border border-transparent border-l border-l-solid border-l-red bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white shadow-xs hover:bg-indigo-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-base"
                         isIconOnly
                     >
                         <ChevronDownIcon width="1.5rem" />

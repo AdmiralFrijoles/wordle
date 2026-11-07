@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import {useDisclosure, Button, Image} from "@nextui-org/react";
+import {useDisclosure, Button, Image} from "@heroui/react";
 import HeaderIcon from "@/components/header/HeaderIcon";
 import {UserCircleIcon} from "@heroicons/react/24/outline";
 import BaseModal from "@/components/modal/ModalBase";

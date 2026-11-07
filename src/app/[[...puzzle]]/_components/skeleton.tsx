@@ -3,7 +3,7 @@
 import GameGrid from "@/components/game/grid";
 import Keyboard from "@/components/game/keyboard";
 import {initRows} from "@/lib/guesses";
-import {Skeleton} from "@nextui-org/react";
+import {Skeleton} from "@heroui/react";
 
 export function PuzzlePageSkeleton() {
     const rows = initRows(6, 5);

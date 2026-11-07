@@ -3,7 +3,7 @@
 import {PuzzlePieceIcon} from "@heroicons/react/24/outline";
 import HeaderIcon from "@/components/header/HeaderIcon";
 import BaseModal from "@/components/modal/ModalBase";
-import {useDisclosure, Card, CardBody, CardHeader, Skeleton} from "@nextui-org/react";
+import {useDisclosure, Card, CardBody, CardHeader, Skeleton} from "@heroui/react";
 import {useAsync} from "react-use";
 import {listPuzzlesForUser} from "@/lib/puzzle-service";
 import {useState} from "react";
@@ -98,7 +98,7 @@ export default function PuzzleSelectModal({hasMultiplePuzzles}: { hasMultiplePuz
                                 <Card
                                     className="bg-transparent shadow-none rounded border-2 border-solid
                                 hover:bg-slate-100 active:bg-slate-200 bg-slate-200
-                                hover:dark:bg-slate-700 dark:bg-slate-600 border-slate-200 dark:border-slate-600"
+                                dark:hover:bg-slate-700 dark:bg-slate-600 border-slate-200 dark:border-slate-600"
                                 >
                                     <CardHeader className="justify-start py-2">
                                         <h4 className="font-bold text-medium">{puzzle.title}</h4>
