@@ -21,7 +21,7 @@ export default function GameGridCell({value, status, position = 0, isRevealing, 
     const animationDelay = `${isCompleted ? position * REVEAL_TIME_MS : 0}ms`
 
     const classes = classnames(
-        'prevent-select xxshort:w-11 xxshort:h-11 short:text-2xl short:w-12 short:h-12 w-14 h-14 border-solid border-2 flex items-center justify-center mx-0.5 text-4xl font-bold rounded-sm dark:text-white',
+        'prevent-select w-14 h-14 border-solid border-2 flex items-center justify-center mx-0.5 text-4xl font-bold rounded-sm dark:text-white',
         {
             'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-600':
                 !status || status === "Guessing",
@@ -45,7 +45,7 @@ export default function GameGridCell({value, status, position = 0, isRevealing, 
     return (
         <>
             {isLoading ?
-                <Skeleton className="skeleton xxshort:w-11 xxshort:h-11 short:w-12 short:h-12 w-14 h-14 flex items-center justify-center mx-0.5 rounded-sm"/> :
+                <Skeleton className="skeleton w-14 h-14 flex items-center justify-center mx-0.5 rounded-sm"/> :
                 <div className={classes} style={{animationDelay}}>
                     <div className="letter-container" style={{animationDelay}}>
                         {value}

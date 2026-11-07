@@ -51,7 +51,7 @@ export default function ChangelogModal() {
                 <p className="text-tiny text-gray-400">v{APP_VERSION}</p>
             </>
         )} isOpen={isOpen} onOpenChange={onOpenChange}>
-            <div className="prose dark:prose-invert prose-sm prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-h4:text-md prose-h5:text-sm">
+            <div className="prose dark:prose-invert prose-sm prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-h5:text-sm">
                 {content}
             </div>
         </BaseModal>

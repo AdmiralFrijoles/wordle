@@ -91,7 +91,7 @@ export default function ShareButton(props: Props) {
             <Dropdown placement="bottom-end">
                 <DropdownTrigger>
                     <Button
-                        className="w-20 items-center justify-center rounded-r-md border border-transparent border-l border-l-solid border-l-red bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white shadow-xs hover:bg-indigo-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-base"
+                        className="w-20 items-center justify-center rounded-r-md border border-transparent bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white shadow-xs hover:bg-indigo-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-base"
                         isIconOnly
                     >
                         <ChevronDownIcon width="1.5rem" />

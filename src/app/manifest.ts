@@ -1,9 +1,17 @@
 ﻿import {MetadataRoute} from "next";
+import {getAppSetting} from "@/lib/settings-service";
+import {SETTING_APP_DESCRIPTION, SETTING_APP_TITLE} from "@/constants/settings";
 
-export default function manifest(): MetadataRoute.Manifest {
+// Settings live in the database, which is not available at build time.
+export const dynamic = "force-dynamic";
+
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+    const title = await getAppSetting<string>(SETTING_APP_TITLE);
+    const description = await getAppSetting<string>(SETTING_APP_DESCRIPTION);
+
     return {
-        name: "Wordle",
-        description: "",
+        name: title ?? "Wordle",
+        description: description ?? "",
         start_url: "/",
         display: "standalone",
         theme_color: "#0f172a",

@@ -15,7 +15,7 @@ export default async function Header() {
 
     return (
         <div className="navbar border-b-2 border-slate-200 dark:border-slate-700">
-            <div className="navbar-content px-5 short:h-auto">
+            <div className="navbar-content px-5">
                 <div className="flex-1 flex justify-start mr-auto space-x-2">
                     <GuideModal/>
                     <PuzzleSelectModal hasMultiplePuzzles={puzzleCount > 1}/>

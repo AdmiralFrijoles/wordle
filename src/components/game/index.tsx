@@ -227,8 +227,8 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
 
     return (
         <div
-            className="mx-auto flex w-full grow flex-col px-1 pb-2 sm:px-6 md:max-w-7xl lg:px-8 short:pb-2 pt-2 short:pt-2">
-            <div className="flex flex-col items-center justify-center pt-0 pb-2 short:pb-1 space-y-1">
+            className="mx-auto flex w-full grow flex-col px-1 pb-2 sm:px-6 md:max-w-7xl lg:px-8 pt-2">
+            <div className="flex flex-col items-center justify-center pt-0 pb-2 space-y-1">
                 {(isUsingHardMode || settings.isHardMode) &&
                     <Tooltip content="Any revealed hints must be used in subsequent guesses">
                         <p className="prevent-select font-semibold text-sm px-2 pb-2 text-warning-900 dark:text-warning-400">Hard Mode</p>
