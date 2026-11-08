@@ -59,11 +59,13 @@ export function GamePanelHeader({currentPuzzle, currentSolution, previousPuzzleD
             </SolutionStep>
             <div className="flex min-w-0 flex-1 flex-col items-center">
                 <div className="flex max-w-full items-center">
+                    {currentSolution && <span aria-hidden="true" className="w-9 shrink-0"/>}
                     <Tooltip content={currentPuzzle.description} delay={300} closeDelay={0} placement="bottom"
                              isDisabled={!currentPuzzle.description}>
                         {puzzleModal ?
                             <button type="button" onClick={puzzleModal.onOpen}
-                                    className="flex h-9 min-w-0 cursor-pointer items-center gap-1 rounded-[10px] pr-1.5 pl-2.5 transition-colors hover:bg-hover">
+                                    className="flex h-9 min-w-0 cursor-pointer items-center gap-1 rounded-[10px] px-1.5 transition-colors hover:bg-hover">
+                                <span aria-hidden="true" className="w-4 shrink-0"/>
                                 {title}
                                 <ChevronDownIcon size={16} className="shrink-0 text-fg-sub"/>
                             </button> :
