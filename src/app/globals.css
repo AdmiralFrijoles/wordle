@@ -311,8 +311,10 @@
   /* A tile mid reveal is a slab: front and back faces 8px apart, joined by top and bottom edges. */
   .tile-3d {
     perspective: 420px;
+    animation: tileSwell 600ms ease-in-out var(--flip-delay) both;
   }
 
+  /* One eased segment keeps the turn fastest at the edge. Easing each half stalls it edge on. */
   .tile-inner {
     position: relative;
     width: 100%;
@@ -320,7 +322,7 @@
     border-radius: inherit;
     transform-style: preserve-3d;
     transform: rotateX(180deg);
-    animation: tileFlip 600ms cubic-bezier(.45, .05, .3, 1) var(--flip-delay) backwards;
+    animation: tileFlip 600ms cubic-bezier(.65, 0, .35, 1) var(--flip-delay) backwards;
   }
 
   .tile-face {
@@ -374,11 +376,11 @@
   }
 
   .tile-front .tile-shade {
-    animation: shadeOut 600ms cubic-bezier(.45, .05, .3, 1) var(--flip-delay) both;
+    animation: shadeOut 600ms cubic-bezier(.65, 0, .35, 1) var(--flip-delay) both;
   }
 
   .tile-back .tile-shade {
-    animation: shadeIn 600ms cubic-bezier(.45, .05, .3, 1) var(--flip-delay) both;
+    animation: shadeIn 600ms cubic-bezier(.65, 0, .35, 1) var(--flip-delay) both;
   }
 
   .win-hop {
@@ -418,6 +420,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .tile-3d,
     .tile-inner,
     .tile-shade,
     .win-hop,
@@ -435,31 +438,38 @@
 }
 
 @keyframes tileFlip {
-  0% {
-    transform: rotateX(0deg) scale(1);
+  from {
+    transform: rotateX(0deg);
   }
-  50% {
-    transform: rotateX(90deg) scale(1.08);
-  }
-  100% {
-    transform: rotateX(180deg) scale(1);
+  to {
+    transform: rotateX(180deg);
   }
 }
 
+@keyframes tileSwell {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+/* Shade uses the turn's easing, so it is half dark when the tile is edge on. */
 @keyframes shadeOut {
-  0% {
+  from {
     opacity: 0;
   }
-  50%, 100% {
-    opacity: 0.55;
+  to {
+    opacity: 1;
   }
 }
 
 @keyframes shadeIn {
-  0%, 50% {
-    opacity: 0.55;
+  from {
+    opacity: 1;
   }
-  100% {
+  to {
     opacity: 0;
   }
 }
