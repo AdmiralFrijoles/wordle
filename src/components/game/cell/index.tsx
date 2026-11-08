@@ -23,9 +23,7 @@ const resultClasses: Partial<Record<CharStatus, string>> = {
 };
 
 export default function GameGridCell({value, status, position = 0, isRevealing, isCompleted, isActive, isCelebrating, isLoading, size = "board"}: Props) {
-    const isFilled = value && !isCompleted
     const resultClass = status ? resultClasses[status] : undefined;
-    const isGuessing = !resultClass;
 
     const sizeClasses = size === "small"
         ? "h-10 w-10 rounded-[9px] text-xl"
@@ -35,14 +33,15 @@ export default function GameGridCell({value, status, position = 0, isRevealing, 
         return <Skeleton className={classnames("skeleton", sizeClasses)}/>;
     }
 
-    if (isRevealing && isCompleted && resultClass) {
-        const flipStyle = {
+    // Tiles are only 3D while turning. Resting 3D layers show stray seams on some GPUs.
+    if (resultClass && isRevealing && isCompleted) {
+        const style = {
             "--flip-delay": `${position * REVEAL_TIME_MS}ms`,
             "--tile-h": size === "small" ? "40px" : "var(--tile)",
         } as CSSProperties;
         return (
-            <div className={classnames("prevent-select tile-3d font-bold", sizeClasses)} style={flipStyle}>
-                <div className="tile-inner">
+            <div style={style} className={classnames("prevent-select tile-3d tile-swell font-bold", sizeClasses)}>
+                <div className="tile-inner is-flipped is-flipping">
                     <div aria-hidden="true" className="tile-edge tile-edge-top"/>
                     <div aria-hidden="true" className="tile-edge tile-edge-bottom"/>
                     <div aria-hidden="true" className="tile-face tile-front tile-typed">
@@ -63,10 +62,10 @@ export default function GameGridCell({value, status, position = 0, isRevealing, 
         sizeClasses,
         resultClass,
         {
-            'tile-empty': isGuessing && !value && !isActive,
-            'tile-active': isGuessing && !value && isActive,
-            'tile-typed': isGuessing && !!value,
-            'cell-fill-animation': isFilled,
+            'tile-empty': !resultClass && !value && !isActive,
+            'tile-active': !resultClass && !value && isActive,
+            'tile-typed': !resultClass && !!value,
+            'cell-fill-animation': value && !isCompleted,
             'win-hop relative overflow-hidden': isCelebrating,
         }
     )
