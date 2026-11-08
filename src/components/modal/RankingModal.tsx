@@ -3,7 +3,7 @@
 import {ChartBarIcon, ClockIcon} from "@heroicons/react/24/outline";
 import HeaderIcon from "@/components/header/HeaderIcon";
 import BaseModal from "@/components/modal/ModalBase";
-import {useDisclosure} from "@nextui-org/use-disclosure";
+import {useDisclosure, Skeleton} from "@heroui/react";
 import StatBar from "@/components/statbar";
 import {useCurrentPuzzle} from "@/providers/PuzzleProvider";
 import {IUserPuzzleSolution, PuzzleStats} from "@/types";
@@ -20,7 +20,6 @@ import ShareButton from "@/components/sharebutton";
 import {asDateOnly} from "@/lib/date-util";
 import {solutionExists} from "@/lib/puzzle-service";
 import {useGlobalModal} from "@/providers/GlobalModalProvider";
-import {Skeleton} from "@nextui-org/react";
 
 type Props = {
     appTitle: string

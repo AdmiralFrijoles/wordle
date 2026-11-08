@@ -3,7 +3,7 @@
 import GameGrid from "@/components/game/grid";
 import Keyboard from "@/components/game/keyboard";
 import {initRows} from "@/lib/guesses";
-import {Skeleton} from "@nextui-org/react";
+import {Skeleton} from "@heroui/react";
 
 export function PuzzlePageSkeleton() {
     const rows = initRows(6, 5);
@@ -15,7 +15,7 @@ export function PuzzlePageSkeleton() {
             </div>
 
             <div
-                className="mx-auto flex w-full grow flex-col px-1 pb-2 sm:px-6 md:max-w-7xl lg:px-8 short:pb-2 pt-2 short:pt-2">
+                className="mx-auto flex w-full grow flex-col px-1 pb-2 sm:px-6 md:max-w-7xl lg:px-8 pt-2">
                 <div className="flex grow flex-col">
                     <GameGrid
                         isLoading={true}

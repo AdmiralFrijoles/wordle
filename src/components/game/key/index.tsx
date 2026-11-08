@@ -3,7 +3,7 @@ import {CharStatus} from "@/types";
 import {useSettings} from "@/providers/SettingsProvider";
 import {REVEAL_TIME_MS} from "@/constants";
 import React, {ReactNode} from "react";
-import {Skeleton} from "@nextui-org/react";
+import {Skeleton} from "@heroui/react";
 
 const WORD_LENGTH = 5;
 
@@ -20,9 +20,9 @@ export default function Key({ children, value, status, onClick, isRevealing, dis
     const settings = useSettings();
     const keyDelayMs = REVEAL_TIME_MS * WORD_LENGTH;
     const classes = classnames(
-        'prevent-select xxshort:h-8 xshort:h-10 flex ' +
-        'short:h-12 h-14 items-center justify-center rounded mx-[0.17rem] my-[0.1rem] ' +
-        'short:text-xs font-bold cursor-pointer select-none dark:text-white',
+        'prevent-select flex ' +
+        'h-14 items-center justify-center rounded-sm mx-[0.17rem] my-[0.1rem] ' +
+        'font-bold cursor-pointer select-none dark:text-white',
         {
             'w-12 text-ss': value === "ENTER",
             'w-12': value === "DELETE",

@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import {useGlobalModal} from "@/providers/GlobalModalProvider";
-import {useDisclosure} from "@nextui-org/use-disclosure";
+import {useDisclosure} from "@heroui/react";
 import BaseModal from "@/components/modal/ModalBase";
 import {APP_VERSION, APP_RELEASE_DATE} from "@/constants"
 import {DateFormatter, getLocalTimeZone, parseDate} from "@internationalized/date";
@@ -37,7 +37,6 @@ export default function ChangelogModal() {
             const file = await unified()
                 .use(remarkParse)
                 .use(remarkRehype)
-                // @ts-expect-error TS2345
                 .use(rehypeReact, production)
                 .process(markdown);
             setContent(file.result);
@@ -52,7 +51,7 @@ export default function ChangelogModal() {
                 <p className="text-tiny text-gray-400">v{APP_VERSION}</p>
             </>
         )} isOpen={isOpen} onOpenChange={onOpenChange}>
-            <div className="prose dark:prose-invert prose-sm prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-h4:text-md prose-h5:text-sm">
+            <div className="prose dark:prose-invert prose-sm prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-h5:text-sm">
                 {content}
             </div>
         </BaseModal>

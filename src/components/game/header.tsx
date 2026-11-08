@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import {Tooltip} from "@nextui-org/react";
+import {Tooltip} from "@heroui/react";
 import Link from "next/link";
 import PuzzleLinkButton from "@/components/PuzzleLinkButton";
 import {format} from "date-fns";

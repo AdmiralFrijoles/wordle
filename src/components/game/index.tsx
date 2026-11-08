@@ -13,7 +13,7 @@ import {upsertUserSolution} from "@/lib/user-service";
 import {useSettings} from "@/providers/SettingsProvider";
 import {useCurrentPuzzle} from "@/providers/PuzzleProvider";
 import {findFirstUnusedReveal, getGuessRows, setRowGuessStatuses} from "@/lib/guesses";
-import {Tooltip} from "@nextui-org/tooltip";
+import {Tooltip} from "@heroui/react";
 import {asDateOnly} from "@/lib/date-util";
 import {useGlobalModal} from "@/providers/GlobalModalProvider";
 
@@ -35,7 +35,7 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
     const [gameState, setGameState] = useState<keyof typeof GameStates>("Unsolved");
     const [isRevealing, setIsRevealing] = useState(false)
     const [alertId, setAlertId] = useState<string | undefined>();
-    const timer = useRef<NodeJS.Timeout>();
+    const timer = useRef<NodeJS.Timeout>(undefined);
     const [currentRowClass, setCurrentRowClass] = useState("");
     const [isUsingHardMode, setIsUsingHardMode] = useState(false);
     const [isJustCompleted, setIsJustCompleted] = useState(false);
@@ -227,13 +227,13 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
 
     return (
         <div
-            className="mx-auto flex w-full grow flex-col px-1 pb-2 sm:px-6 md:max-w-7xl lg:px-8 short:pb-2 pt-2 short:pt-2">
-            <div className="flex flex-col items-center justify-center pt-0 pb-2 short:pb-1 space-y-1">
+            className="mx-auto flex w-full grow flex-col px-1 pb-2 sm:px-6 md:max-w-7xl lg:px-8 pt-2">
+            <div className="flex flex-col items-center justify-center pt-0 pb-2 space-y-1">
                 {(isUsingHardMode || settings.isHardMode) &&
                     <Tooltip content="Any revealed hints must be used in subsequent guesses">
                         <p className="prevent-select font-semibold text-sm px-2 pb-2 text-warning-900 dark:text-warning-400">Hard Mode</p>
                     </Tooltip>}
-                {gameState == "Loss" && <p className="prevent-select uppercase text-lg font-semibold tracking-widest px-2 pb-1 rounded shadowed bg-red-400 dark:bg-red-700 text-white border-slate-400 dark:border-slate-700">
+                {gameState == "Loss" && <p className="prevent-select uppercase text-lg font-semibold tracking-widest px-2 pb-1 rounded-sm shadowed bg-red-400 dark:bg-red-700 text-white border-slate-400 dark:border-slate-700">
                     {solution.solution}
                 </p>}
             </div>

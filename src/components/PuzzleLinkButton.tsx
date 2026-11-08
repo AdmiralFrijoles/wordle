@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import {LinkIcon} from "@heroicons/react/24/outline";
-import {Tooltip} from "@nextui-org/react";
+import {Tooltip} from "@heroui/react";
 import {alertSuccess} from "@/lib/alerts";
 
 type Props = {

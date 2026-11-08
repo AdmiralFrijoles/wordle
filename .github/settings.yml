@@ -13,7 +13,7 @@ repository:
   has_downloads: true
   has_projects: false
 
-  default_branch: master
+  default_branch: main
 
   allow_squash_merge: true
   allow_rebase_merge: true

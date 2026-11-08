@@ -2,14 +2,13 @@
 
 import {Cog6ToothIcon} from "@heroicons/react/24/outline";
 import HeaderIcon from "@/components/header/HeaderIcon";
-import {useDisclosure} from "@nextui-org/use-disclosure";
+import {useDisclosure, Button} from "@heroui/react";
 import BaseModal from "@/components/modal/ModalBase";
 import SettingsToggle from "@/components/settings/SettingsToggle";
 import {useSettings} from "@/providers/SettingsProvider";
 import {alertError} from "@/lib/alerts";
 import {APP_VERSION} from "@/constants";
 import {useGlobalModal} from "@/providers/GlobalModalProvider";
-import {Button} from "@nextui-org/react";
 
 export default function SettingsModal() {
     const {isOpen, onOpen, onOpenChange} = useDisclosure();

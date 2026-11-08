@@ -2,7 +2,7 @@
 
 import {InformationCircleIcon} from "@heroicons/react/24/outline";
 import HeaderIcon from "@/components/header/HeaderIcon";
-import {useDisclosure} from "@nextui-org/use-disclosure";
+import {useDisclosure} from "@heroui/react";
 import BaseModal from "@/components/modal/ModalBase";
 import GameGridCell from "@/components/game/cell";
 

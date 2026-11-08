@@ -5,8 +5,7 @@ import HeaderIcon from "@/components/header/HeaderIcon";
 import {useCurrentPuzzle} from "@/providers/PuzzleProvider";
 import {useEffect, useRef, useState} from "react";
 import BaseModal from "@/components/modal/ModalBase";
-import {useDisclosure} from "@nextui-org/use-disclosure";
-import {Calendar, Skeleton} from "@nextui-org/react";
+import {useDisclosure, Calendar, Skeleton} from "@heroui/react";
 import {DateValue, getLocalTimeZone, today, CalendarDate} from "@internationalized/date";
 import {useAsync} from "react-use";
 import {listDatesForPuzzle} from "@/lib/puzzle-service";
@@ -103,7 +102,7 @@ export default function ArchiveModal() {
                                 isDateUnavailable={isDateUnavailable}
                                 hideDisabledDates={true}
                                 classNames={{
-                                    base: "w-full rounded text-base shadow-none border-none text-lg dark:bg-transparent",
+                                    base: "w-full rounded-sm text-base shadow-none border-none text-lg dark:bg-transparent",
                                     cell: "p-0",
                                     cellButton: "m-1",
                                     gridHeaderCell: "m-1",
