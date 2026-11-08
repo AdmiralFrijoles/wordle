@@ -1,8 +1,8 @@
 ﻿import {CharStatus} from "@/types";
-import {useSettings} from "@/providers/SettingsProvider";
 import classnames from "classnames";
 import {REVEAL_TIME_MS} from "@/constants";
 import {Skeleton} from "@heroui/react";
+import type {CSSProperties} from "react";
 
 type Props = {
     value?: string;
@@ -10,48 +10,70 @@ type Props = {
     position?: number;
     isRevealing?: boolean;
     isCompleted?: boolean;
+    isActive?: boolean;
+    isCelebrating?: boolean;
     isLoading?: boolean | undefined;
+    size?: "board" | "small";
 };
 
-export default function GameGridCell({value, status, position = 0, isRevealing, isCompleted, isLoading}: Props) {
-    const settings = useSettings();
+const resultClasses: Partial<Record<CharStatus, string>> = {
+    Absent: "tile-absent",
+    Correct: "hit-correct",
+    Present: "hit-present",
+};
 
-    const isFilled = value && !isCompleted
-    const shouldReveal = isRevealing && isCompleted
-    const animationDelay = `${isCompleted ? position * REVEAL_TIME_MS : 0}ms`
+export default function GameGridCell({value, status, position = 0, isRevealing, isCompleted, isActive, isCelebrating, isLoading, size = "board"}: Props) {
+    const resultClass = status ? resultClasses[status] : undefined;
+
+    const sizeClasses = size === "small"
+        ? "h-10 w-10 rounded-[9px] text-xl"
+        : "size-[var(--tile)] rounded-xl text-[calc(var(--tile)*0.48)] sm:rounded-[14px]";
+
+    if (isLoading) {
+        return <Skeleton className={classnames("skeleton", sizeClasses)}/>;
+    }
+
+    // Tiles only take the layered flip markup while turning. Flat tiles at rest avoid stray seams.
+    if (resultClass && isRevealing && isCompleted) {
+        const style = {
+            "--flip-delay": `${position * REVEAL_TIME_MS}ms`,
+            "--tile-h": size === "small" ? "40px" : "var(--tile)",
+        } as CSSProperties;
+        return (
+            <div style={style} className={classnames("prevent-select tile-swell font-bold", sizeClasses)}>
+                <div className="tile-inner">
+                    <div aria-hidden="true" className="tile-edge"/>
+                    <div aria-hidden="true" className="tile-face tile-front tile-typed">
+                        {value}
+                        <span className="tile-shade"/>
+                    </div>
+                    <div className={classnames("tile-face tile-back", resultClass)}>
+                        {value}
+                        <span aria-hidden="true" className="tile-shade"/>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     const classes = classnames(
-        'prevent-select w-14 h-14 border-solid border-2 flex items-center justify-center mx-0.5 text-4xl font-bold rounded-sm dark:text-white',
+        'prevent-select box-border flex items-center justify-center border-[1.5px] font-bold',
+        sizeClasses,
+        resultClass,
         {
-            'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-600':
-                !status || status === "Guessing",
-            'border-black dark:border-slate-100':
-                value && (!status || status === "Guessing"),
-            'absent shadowed bg-slate-400 dark:bg-slate-700 text-white border-slate-400 dark:border-slate-700':
-                status === 'Absent',
-            'correct shadowed bg-orange-500 text-white border-orange-500':
-                status === 'Correct' && settings.isHighContrast,
-            'present shadowed bg-cyan-500 text-white border-cyan-500':
-                status === 'Present' && settings.isHighContrast,
-            'correct shadowed bg-green-500 text-white border-green-500':
-                status === 'Correct' && !settings.isHighContrast,
-            'present shadowed bg-yellow-500 text-white border-yellow-500':
-                status === 'Present' && !settings.isHighContrast,
-            'cell-fill-animation': isFilled,
-            'cell-reveal': shouldReveal,
+            'tile-empty': !resultClass && !value && !isActive,
+            'tile-active': !resultClass && !value && isActive,
+            'tile-typed': !resultClass && !!value,
+            'cell-fill-animation': value && !isCompleted,
+            'win-hop relative overflow-hidden': isCelebrating,
         }
     )
 
     return (
-        <>
-            {isLoading ?
-                <Skeleton className="skeleton w-14 h-14 flex items-center justify-center mx-0.5 rounded-sm"/> :
-                <div className={classes} style={{animationDelay}}>
-                    <div className="letter-container" style={{animationDelay}}>
-                        {value}
-                    </div>
-                </div>
-            }
-        </>
+        <div className={classes} style={isCelebrating ? {animationDelay: `${position * 100}ms`} : undefined}>
+            {value}
+            {isCelebrating &&
+                <span aria-hidden="true" className="win-sheen" style={{animationDelay: `${380 + position * 100}ms`}}/>}
+        </div>
     )
 }

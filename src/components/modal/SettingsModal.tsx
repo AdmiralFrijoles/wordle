@@ -1,8 +1,8 @@
 ﻿"use client";
 
-import {Cog6ToothIcon} from "@heroicons/react/24/outline";
 import HeaderIcon from "@/components/header/HeaderIcon";
-import {useDisclosure, Button} from "@heroui/react";
+import {useDisclosure} from "@heroui/react";
+import {SettingsIcon} from "@/components/icons";
 import BaseModal from "@/components/modal/ModalBase";
 import SettingsToggle from "@/components/settings/SettingsToggle";
 import {useSettings} from "@/providers/SettingsProvider";
@@ -25,11 +25,11 @@ export default function SettingsModal() {
 
     return (
         <>
-            <HeaderIcon tooltipContent="Settings">
-                <Cog6ToothIcon className="dark:stroke-white" onClick={onOpen}/>
+            <HeaderIcon label="Settings" onPress={onOpen}>
+                <SettingsIcon/>
             </HeaderIcon>
             <BaseModal title="Settings" isOpen={isOpen} onOpenChange={onOpenChange}>
-                <div className="mt-2 flex flex-col divide-y">
+                <div className="glass flex flex-col divide-y divide-line rounded-[18px]">
                     <SettingsToggle
                         settingName="Hard Mode"
                         flag={settings.isHardMode}
@@ -47,21 +47,17 @@ export default function SettingsModal() {
                         handleFlag={settings.setIsHighContrast}
                         description="For improved color vision"
                     />
-                    <div className="flex justify-between gap-4 py-3">
-                        <div className="mt-0 text-left text-gray-500 dark:text-gray-300">
-                            <p className="leading-none">App Version</p>
-                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-300">
-                                v{APP_VERSION}
-                            </p>
-                        </div>
-                        {changelogModal &&
-                            <Button
-                                onPress={changelogModal.onOpenChange}
-                                className="min-w-24 h-9 flex shrink-0 rounded-md p-1 bg-indigo-600 hover:bg-indigo-700 text-white"
-                            >
-                            What&#39;s New
-                            </Button>}
+                </div>
+                <div className="glass flex items-center gap-4 rounded-[18px] px-4 py-3.5">
+                    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <span className="text-base font-semibold text-fg">App Version</span>
+                        <span className="text-[13px] text-fg-sub tabular-nums">v{APP_VERSION}</span>
                     </div>
+                    {changelogModal &&
+                        <button type="button" onClick={changelogModal.onOpen}
+                                className="btn-primary h-11 shrink-0 cursor-pointer rounded-xl px-4 text-sm font-semibold">
+                            What&#39;s New
+                        </button>}
                 </div>
             </BaseModal>
         </>

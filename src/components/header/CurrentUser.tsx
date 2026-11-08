@@ -1,4 +1,4 @@
-﻿import {UserCircleIcon} from "@heroicons/react/24/outline";
+﻿import {UserIcon} from "@/components/icons";
 import HeaderIcon from "@/components/header/HeaderIcon";
 import {auth, signIn, signOut} from "@/lib/auth";
 import UserModal from "@/components/modal/UserModal";
@@ -21,11 +21,9 @@ export default async function CurrentUser() {
                 "use server";
                 await signIn("discord");
             }}>
-                <HeaderIcon tooltipContent={tooltip}>
-                    <button type="submit">
-                        <UserCircleIcon className="dark:stroke-white w-6 h-6"/>
-                    </button>
-                 </HeaderIcon>
+                <HeaderIcon label={tooltip} type="submit">
+                    <UserIcon/>
+                </HeaderIcon>
             </form>
         );
     }

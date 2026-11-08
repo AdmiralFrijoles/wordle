@@ -1,66 +1,48 @@
 ﻿import classnames from 'classnames'
 import {CharStatus} from "@/types";
-import {useSettings} from "@/providers/SettingsProvider";
-import {REVEAL_TIME_MS} from "@/constants";
 import React, {ReactNode} from "react";
 import {Skeleton} from "@heroui/react";
-
-const WORD_LENGTH = 5;
 
 type Props = {
     children?: ReactNode;
     value: string;
+    label?: string;
     onClick?: (letter: string) => void;
     status?: CharStatus;
     isRevealing?: boolean;
     disabled?: boolean | undefined;
 };
 
-export default function Key({ children, value, status, onClick, isRevealing, disabled }: Props) {
-    const settings = useSettings();
-    const keyDelayMs = REVEAL_TIME_MS * WORD_LENGTH;
+export default function Key({ children, value, label, status, onClick, disabled }: Props) {
+    const isWide = value === "ENTER" || value === "DELETE";
     const classes = classnames(
-        'prevent-select flex ' +
-        'h-14 items-center justify-center rounded-sm mx-[0.17rem] my-[0.1rem] ' +
-        'font-bold cursor-pointer select-none dark:text-white',
+        'prevent-select flex h-14 min-w-0 cursor-pointer items-center justify-center rounded-[10px] p-0 font-semibold sm:h-[58px] sm:rounded-[11px]',
+        isWide ? 'flex-[1.55_1_0] text-xs tracking-[0.04em]' : 'flex-[1_1_0] text-[17px]',
         {
-            'w-12 text-ss': value === "ENTER",
-            'w-12': value === "DELETE",
-        },
-        !disabled ? {
-            'transition ease-in-out': isRevealing,
-            'bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 active:bg-slate-400': !status || status === "Guessing",
-            'bg-slate-400 dark:bg-slate-800 text-white': status === 'Absent',
-            'bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white':
-                status === 'Correct' && settings.isHighContrast,
-            'bg-cyan-500 hover:bg-cyan-600 active:bg-cyan-700 text-white':
-                status === 'Present' && settings.isHighContrast,
-            'bg-green-500 hover:bg-green-600 active:bg-green-700 text-white':
-                status === 'Correct' && !settings.isHighContrast,
-            'bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700 text-white':
-                status === 'Present' && !settings.isHighContrast,
-        } : 'skeleton bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-500 cursor-default',
-        {
-            'w-8 text-xl': value !== "ENTER" && value !== "DELETE",
+            'key-default': !status || status === "Guessing",
+            'key-absent': status === 'Absent',
+            'hit-correct [--hit-glow:calc(var(--tile-glow)*0.6)]': status === 'Correct',
+            'hit-present [--hit-glow:calc(var(--tile-glow)*0.6)]': status === 'Present',
         }
     )
 
-    const styles = {
-        transitionDelay: isRevealing ? `${keyDelayMs}ms` : 'unset'
-    }
-
     function handleOnLetterClick(event: React.MouseEvent<HTMLButtonElement>) {
-        if (disabled) return;
-        if (onClick) onClick(value);
+        if (disabled) {
+            return;
+        }
+        if (onClick) {
+            onClick(value);
+        }
         event.currentTarget.blur();
     }
 
+    const spokenStatus = status && status !== "Guessing" ? ` ${status.toLowerCase()}` : '';
+
     return (
         <>
-        {disabled ? <Skeleton className={classes}/> :
-        <button style={styles}
-                disabled={disabled}
-                aria-label={`${value}${status ? ' ' + status : ''}`}
+        {disabled ? <Skeleton className={classnames("skeleton h-14 sm:h-[58px]", isWide ? 'flex-[1.55_1_0]' : 'flex-[1_1_0]')}/> :
+        <button type="button"
+                aria-label={`${label ?? value}${spokenStatus}`}
                 className={classes}
                 onClick={handleOnLetterClick}
         >

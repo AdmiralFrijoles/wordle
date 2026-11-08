@@ -3,14 +3,13 @@
 import {useState} from "react";
 import {
     Button,
-    ButtonGroup,
     Dropdown,
     DropdownItem,
     DropdownMenu,
     DropdownTrigger,
     SharedSelection
 } from "@heroui/react";
-import {ChevronDownIcon, ShareIcon} from "@heroicons/react/24/outline";
+import {ChevronDownIcon, ShareIcon} from "@/components/icons";
 import {alertError, alertSuccess} from "@/lib/alerts";
 import {IUserPuzzleSolution} from "@/types";
 import {Puzzle, Solution} from "@prisma/client";
@@ -81,20 +80,22 @@ export default function ShareButton(props: Props) {
     }
 
     return (
-        <ButtonGroup variant="flat" fullWidth={true}>
-            <Button className="flex w-full justify-start items-center rounded-l-md border border-transparent bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white shadow-xs hover:bg-indigo-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-base"
+        <div className="btn-primary flex h-[54px] items-stretch rounded-2xl">
+            <Button className="h-full flex-1 gap-2.5 rounded-none rounded-l-2xl bg-transparent text-base font-bold text-white"
                     onPress={handleShare}
             >
-                <ShareIcon className="justify-start mr-2 h-6 w-6 cursor-pointer dark:stroke-white"/>
-                <p className="justify-center text-center w-full">{selectedOptionLabel}</p>
+                <ShareIcon size={20}/>
+                {selectedOptionLabel}
             </Button>
-            <Dropdown placement="bottom-end">
+            <div aria-hidden="true" className="my-3 w-px bg-white/25"/>
+            <Dropdown placement="bottom-end" classNames={{content: "sheet-surface"}}>
                 <DropdownTrigger>
                     <Button
-                        className="w-20 items-center justify-center rounded-r-md border border-transparent bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white shadow-xs hover:bg-indigo-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-base"
+                        aria-label="Share options"
+                        className="h-full w-14 min-w-14 rounded-none rounded-r-2xl bg-transparent text-white"
                         isIconOnly
                     >
-                        <ChevronDownIcon width="1.5rem" />
+                        <ChevronDownIcon size={20}/>
                     </Button>
                 </DropdownTrigger>
                 <DropdownMenu
@@ -107,13 +108,13 @@ export default function ShareButton(props: Props) {
                 >
                     {actions.map(({id, label, description}) => (
                         <DropdownItem key={id} textValue={label}
-                                      description={(<p className="text-small">{description}</p>)}
+                                      description={(<span className="text-[13px] text-fg-sub">{description}</span>)}
                         >
-                            <p className="text-medium">{label}</p>
+                            <span className="text-base font-semibold text-fg">{label}</span>
                         </DropdownItem>
                     ))}
                 </DropdownMenu>
             </Dropdown>
-        </ButtonGroup>
+        </div>
     );
 }

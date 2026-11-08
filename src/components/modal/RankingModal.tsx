@@ -1,12 +1,13 @@
 ﻿"use client";
 
-import {ChartBarIcon, ClockIcon} from "@heroicons/react/24/outline";
+import {StatsIcon} from "@/components/icons";
 import HeaderIcon from "@/components/header/HeaderIcon";
 import BaseModal from "@/components/modal/ModalBase";
 import {useDisclosure, Skeleton} from "@heroui/react";
 import StatBar from "@/components/statbar";
 import {useCurrentPuzzle} from "@/providers/PuzzleProvider";
-import {IUserPuzzleSolution, PuzzleStats} from "@/types";
+import {PuzzleStats} from "@/types";
+import {listLocalUserSolutions} from "@/lib/local-solutions";
 import {useEffect, useState} from "react";
 import Countdown from "react-countdown";
 import {useSettings} from "@/providers/SettingsProvider";
@@ -75,18 +76,8 @@ export default function RankingModal({appTitle}: Props) {
         if (session?.user?.id) {
             setPuzzleStats(await getUserPuzzleStats(session.user.id, currentPuzzle.id));
         } else {
-            const userSolutions: IUserPuzzleSolution[] = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key?.startsWith("user-solution-")) {
-                    const localStorageValue = localStorage.getItem(key);
-                    if (!localStorageValue) continue;
-                    const userSolution = JSON.parse(localStorageValue) as IUserPuzzleSolution;
-                    if (userSolution.state === "Unsolved") continue;
-                    if (userSolution.puzzleId !== currentPuzzle.id) continue;
-                    userSolutions.push(userSolution);
-                }
-            }
+            const userSolutions = listLocalUserSolutions(currentPuzzle.id)
+                .filter(userSolution => userSolution.state !== "Unsolved");
             setPuzzleStats(buildStats(userSolutions));
         }
         setIsLoading(false);
@@ -96,71 +87,61 @@ export default function RankingModal({appTitle}: Props) {
 
     return (
         <>
-            <HeaderIcon tooltipContent="Stats & Ranking">
-                <ChartBarIcon className="dark:stroke-white" onClick={onOpen}/>
+            <HeaderIcon label="Statistics" onPress={onOpen}>
+                <StatsIcon/>
             </HeaderIcon>
 
             <BaseModal title="Statistics" isOpen={isOpen} onOpenChange={onOpenChange}>
-                <div className="text-center">
-                    <Skeleton className="skeleton" isLoaded={!isLoading}>
-                        <StatBar puzzleStats={puzzleStats}/>
-                    </Skeleton>
-                    <Skeleton className="skeleton" isLoaded={!isLoading}>
-                        {puzzleStats.totalGames > 0 && (
-                            <>
-                                <h4 className="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">
+                <Skeleton className="skeleton rounded-[22px]" isLoaded={!isLoading}>
+                    <StatBar puzzleStats={puzzleStats}/>
+                </Skeleton>
+                <Skeleton className="skeleton" isLoaded={!isLoading}>
+                    {puzzleStats.totalGames > 0 && (
+                        <div className="flex flex-col gap-[18px]">
+                            <div className="flex flex-col gap-2">
+                                <h3 className="mb-1 text-xs font-semibold tracking-[0.08em] text-fg-sub uppercase">
                                     Guess Distribution
-                                </h4>
+                                </h3>
                                 <Histogram
                                     isLatestGame={isLatestGame}
                                     puzzleStats={puzzleStats}
                                     isGameWon={currentUserSolution?.state === "Win"}
                                     numberOfGuessesMade={currentUserSolution?.guesses.length ?? 0}
                                 />
-                                {currentSolution && currentUserSolution && currentUserSolution.state !== "Unsolved" && (
-                                    <div>
-                                        <div
-                                            className="items-center justify-center text-center dark:text-white">
-                                            <div className="inline-block w-full text-left">
-                                                {(isLatestGame && hasNextGame) && (
-                                                    <div>
-                                                        <strong>New word in:&nbsp;</strong>
-                                                        <Countdown
-                                                            className="inline-flex text-lg font-medium text-gray-900 dark:text-gray-100"
-                                                            date={tomorrow.toDate(userTimeZone)}
-                                                            daysInHours={true}
-                                                        />
-                                                    </div>
-                                                )}
-                                                {(!isLatestGame && solutionDate) && (
-                                                    <div className="mt-2 inline-flex w-full">
-                                                        <ClockIcon
-                                                            className="mr-1 mt-2 h-5 w-5 stroke-black dark:stroke-white"/>
-                                                        <div
-                                                            className="inline-flex mt-1 ml-1 text-center text-sm sm:text-base">
-                                                            <strong>Game date:&nbsp;</strong>
-                                                            <p>{dateFormatter.format(solutionDate.toDate(userTimeZone))}</p>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className="w-full mt-4">
-                                            <ShareButton appTitle={appTitle}
-                                                         currentPuzzle={currentPuzzle}
-                                                         currentUserSolution={currentUserSolution}
-                                                         currentSolution={currentSolution}
-                                                         isHighContrast={settings.isHighContrast}
-                                                         isHardMode={settings.isHardMode}
-                                                         isDarkMode={settings.isDarkMode}
+                            </div>
+                            {currentSolution && currentUserSolution && currentUserSolution.state !== "Unsolved" && (
+                                <>
+                                    {(isLatestGame && hasNextGame) && (
+                                        <div className="-mb-1.5 flex items-baseline justify-center gap-2.5">
+                                            <span className="text-sm font-medium text-fg-sub">New word in</span>
+                                            <Countdown
+                                                className="text-xl font-bold tracking-[0.02em] text-fg tabular-nums"
+                                                date={tomorrow.toDate(userTimeZone)}
+                                                daysInHours={true}
                                             />
                                         </div>
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </Skeleton>
-                </div>
+                                    )}
+                                    {(!isLatestGame && solutionDate) && (
+                                        <div className="-mb-1.5 flex items-baseline justify-center gap-2.5">
+                                            <span className="text-sm font-medium text-fg-sub">Game date</span>
+                                            <span className="text-base font-bold text-fg">
+                                                {dateFormatter.format(solutionDate.toDate(userTimeZone))}
+                                            </span>
+                                        </div>
+                                    )}
+                                    <ShareButton appTitle={appTitle}
+                                                 currentPuzzle={currentPuzzle}
+                                                 currentUserSolution={currentUserSolution}
+                                                 currentSolution={currentSolution}
+                                                 isHighContrast={settings.isHighContrast}
+                                                 isHardMode={settings.isHardMode}
+                                                 isDarkMode={settings.isDarkMode}
+                                    />
+                                </>
+                            )}
+                        </div>
+                    )}
+                </Skeleton>
             </BaseModal>
         </>
     )

@@ -4,8 +4,8 @@ import {useEffect, useRef, useState} from "react";
 import {GameStates, IUserPuzzleSolution, Row} from "@/types";
 import Keyboard from "@/components/game/keyboard";
 import isValidWord from "../../lib/dictionary";
-import {REVEAL_TIME_MS} from "@/constants";
-import GameGrid from "@/components/game/grid";
+import {FLIP_DURATION_MS, LOSS_ANIMATION_MS, LOSS_EXIT_MS, REVEAL_TIME_MS, WIN_ANIMATION_MS} from "@/constants";
+import GameGrid, {Celebration} from "@/components/game/grid";
 import {Puzzle, Solution} from "@prisma/client";
 import {useAsync, useDebounce, useEffectOnce, useUnmount, useUpdateEffect} from "react-use";
 import {alertError, clearAlert} from "@/lib/alerts";
@@ -16,6 +16,7 @@ import {findFirstUnusedReveal, getGuessRows, setRowGuessStatuses} from "@/lib/gu
 import {Tooltip} from "@heroui/react";
 import {asDateOnly} from "@/lib/date-util";
 import {useGlobalModal} from "@/providers/GlobalModalProvider";
+import {BoltIcon} from "@/components/icons";
 
 type Props = {
     puzzle: Puzzle;
@@ -39,6 +40,8 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
     const [currentRowClass, setCurrentRowClass] = useState("");
     const [isUsingHardMode, setIsUsingHardMode] = useState(false);
     const [isJustCompleted, setIsJustCompleted] = useState(false);
+    const [celebration, setCelebration] = useState<Celebration>(null);
+    const celebrationTimer = useRef<NodeJS.Timeout>(undefined);
     const rankingModal = useGlobalModal("ranking");
 
     function clearCurrentRowClass () {
@@ -100,7 +103,7 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
         clearTimeout(timer.current)
         timer.current = setTimeout(() => {
             setIsRevealing(false);
-        }, REVEAL_TIME_MS * wordLength);
+        }, REVEAL_TIME_MS * (wordLength - 1) + FLIP_DURATION_MS);
 
         if (isSolution) {
             setGameState("Win");
@@ -199,9 +202,27 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
     }, [userSolution, isRevealing]);
 
     useUpdateEffect(() => {
-        if (!isJustCompleted || isRevealing || !rankingModal) return;
-        rankingModal.onOpen();
+        if (!isJustCompleted || isRevealing) {
+            return;
+        }
         setIsJustCompleted(false);
+        clearTimeout(celebrationTimer.current);
+
+        function openStats() {
+            setCelebration(null);
+            rankingModal?.onOpen();
+        }
+
+        if (gameState === "Win") {
+            setCelebration("win");
+            celebrationTimer.current = setTimeout(openStats, WIN_ANIMATION_MS);
+        } else {
+            setCelebration("loss");
+            celebrationTimer.current = setTimeout(() => {
+                setCelebration("loss-out");
+                celebrationTimer.current = setTimeout(openStats, LOSS_EXIT_MS);
+            }, LOSS_ANIMATION_MS);
+        }
     }, [isJustCompleted, isRevealing]);
 
     useUpdateEffect(() => {
@@ -221,28 +242,43 @@ export default function GamePanel({puzzle, solution, initialUserSolution}: Props
     }, [settings, userSolutionLoading, currentRowIndex, gameState]);
 
     useUnmount(() => {
+        clearTimeout(celebrationTimer.current);
         setCurrentUserSolution(null);
     })
 
 
     return (
-        <div
-            className="mx-auto flex w-full grow flex-col px-1 pb-2 sm:px-6 md:max-w-7xl lg:px-8 pt-2">
-            <div className="flex flex-col items-center justify-center pt-0 pb-2 space-y-1">
+        <div className="flex w-full grow flex-col">
+            <div className="prevent-select mt-2.5 flex min-h-[34px] flex-wrap items-center justify-center gap-x-[18px] gap-y-2 sm:mt-4">
                 {(isUsingHardMode || settings.isHardMode) &&
                     <Tooltip content="Any revealed hints must be used in subsequent guesses">
-                        <p className="prevent-select font-semibold text-sm px-2 pb-2 text-warning-900 dark:text-warning-400">Hard Mode</p>
+                        <span tabIndex={0} className="inline-flex items-center gap-1.5 text-xs font-bold tracking-[0.08em] text-fg-sub uppercase">
+                            <BoltIcon size={14} className="text-brand"/>
+                            Hard Mode
+                        </span>
                     </Tooltip>}
-                {gameState == "Loss" && <p className="prevent-select uppercase text-lg font-semibold tracking-widest px-2 pb-1 rounded-sm shadowed bg-red-400 dark:bg-red-700 text-white border-slate-400 dark:border-slate-700">
-                    {solution.solution}
-                </p>}
+                {gameState == "Loss" && !isRevealing && celebration !== "loss" &&
+                    <div className="flex items-center gap-2.5">
+                        <span className="text-xs font-bold tracking-[0.08em] text-fg-sub uppercase">The word was</span>
+                        <div className="flex gap-1" aria-label={solution.solution.toUpperCase()}>
+                            {solution.solution.toUpperCase().split("").map((letter, i) => (
+                                <span key={i} aria-hidden="true"
+                                      className="tile-reveal inline-flex h-[30px] w-7 items-center justify-center rounded-[7px] text-[15px] font-extrabold">
+                                    {letter}
+                                </span>
+                            ))}
+                        </div>
+                    </div>}
             </div>
-            <div className="flex grow flex-col">
+            <div className="flex grow flex-col gap-4 sm:gap-6">
                 <GameGrid
                     rows={rows}
                     isRevealing={isRevealing}
                     currentRowIndex={currentRowIndex}
                     currentRowClassName={currentRowClass}
+                    isPlaying={gameState === "Unsolved" && !userSolutionLoading}
+                    celebration={celebration}
+                    answer={solution.solution}
                 />
                 <Keyboard
                     onLetterClick={handleLetterClick}

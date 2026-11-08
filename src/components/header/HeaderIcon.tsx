@@ -5,23 +5,22 @@ import {Tooltip} from "@heroui/react";
 
 type HeaderIconProps = {
     children: React.ReactNode;
-    tooltipContent: React.ReactNode | null | undefined;
+    label: string;
+    onPress?: () => void;
+    type?: "button" | "submit";
 }
 
-export default function HeaderIcon({children, tooltipContent}: HeaderIconProps) {
-    if (tooltipContent) {
-        return (
-            <Tooltip showArrow content={tooltipContent}>
-                <div className="h-6 w-6 cursor-pointer animated">
-                    {children}
-                </div>
-            </Tooltip>
-        )
-    } else {
-        return (
-            <div className="h-6 w-6 cursor-pointer animated">
+export default function HeaderIcon({children, label, onPress, type = "button"}: HeaderIconProps) {
+    return (
+        <Tooltip content={label} delay={400} closeDelay={0}>
+            <button
+                type={type}
+                aria-label={label}
+                onClick={onPress}
+                className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl text-fg-icon transition-colors hover:bg-hover hover:text-fg focus-visible:outline-2 focus-visible:outline-brand"
+            >
                 {children}
-            </div>
-        )
-    }
+            </button>
+        </Tooltip>
+    );
 }

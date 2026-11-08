@@ -9,14 +9,10 @@ export function PuzzlePageSkeleton() {
     const rows = initRows(6, 5);
     return (
         <>
-            <div className="flex flex-col items-center justify-center">
-                <Skeleton className="skeleton w-[225px] h-[30px] mb-1"/>
-                <Skeleton className="skeleton w-[250px] h-[25px]"/>
-            </div>
-
-            <div
-                className="mx-auto flex w-full grow flex-col px-1 pb-2 sm:px-6 md:max-w-7xl lg:px-8 pt-2">
-                <div className="flex grow flex-col">
+            <Skeleton className="skeleton h-[86px] rounded-[20px] sm:h-[92px] sm:rounded-[22px]"/>
+            <div className="flex w-full grow flex-col">
+                <div className="mt-2.5 min-h-[34px] sm:mt-4"/>
+                <div className="flex grow flex-col gap-4 sm:gap-6">
                     <GameGrid
                         isLoading={true}
                         currentRowClassName=""
@@ -35,15 +31,6 @@ export function PuzzlePageSkeleton() {
                     />
                 </div>
             </div>
-            </>
-            )
-
-
-            //return (
-            // <div className="flex flex-col items-center justify-center h-[25vh]">
-            // <h2 className="text-xl sm:text-2xl font-bold text-nowrap dark:text-white">
-            // Loading Puzzle...
-            // </h2>
-            // </div>
-            //)
-            }
+        </>
+    )
+}

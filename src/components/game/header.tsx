@@ -1,12 +1,14 @@
 ﻿"use client";
 
+import React from "react";
 import {Tooltip} from "@heroui/react";
 import Link from "next/link";
 import PuzzleLinkButton from "@/components/PuzzleLinkButton";
 import {format} from "date-fns";
-import {ChevronLeftIcon, ChevronRightIcon} from "@heroicons/react/16/solid";
 import {Puzzle, Solution} from "@prisma/client";
 import {CalendarDate, DateFormatter, getLocalTimeZone} from "@internationalized/date";
+import {useGlobalModal} from "@/providers/GlobalModalProvider";
+import {CalendarIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon} from "@/components/icons";
 
 type Props = {
     currentPuzzle: Puzzle
@@ -16,43 +18,71 @@ type Props = {
     selectedDate: CalendarDate
 }
 
+const stepClasses = "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-fg-icon transition-colors";
+
+function SolutionStep({puzzle, date, label, children}: {
+    puzzle: Puzzle,
+    date: CalendarDate | null,
+    label: string,
+    children: React.ReactNode
+}) {
+    const userTimeZone = getLocalTimeZone();
+    if (!date) {
+        return <span aria-hidden="true" className={`${stepClasses} opacity-30`}>{children}</span>;
+    }
+    return (
+        <Link aria-label={label}
+              href={`/${puzzle.slug}/${format(date.toDate(userTimeZone), "yyyy/MM/dd")}`}
+              className={`${stepClasses} hover:bg-hover hover:text-fg`}>
+            {children}
+        </Link>
+    );
+}
+
 export function GamePanelHeader({currentPuzzle, currentSolution, previousPuzzleDate, nextPuzzleDate, selectedDate}: Props) {
     const userTimeZone = getLocalTimeZone();
     const userLocale = (new Intl.NumberFormat()).resolvedOptions().locale;
     const dateFormatter = new DateFormatter(userLocale, {dateStyle: "full"});
+    const puzzleModal = useGlobalModal("puzzles");
+    const archiveModal = useGlobalModal("archive");
+
+    const title = (
+        <span className="truncate text-[17px] font-bold tracking-[-0.01em] text-fg sm:text-lg">
+            {currentPuzzle.title}
+        </span>
+    );
 
     return (
-        <div className="flex flex-col items-center justify-center">
-            <div className="flex items-center justify-center">
-                <Tooltip content={currentPuzzle.description} delay={300} placement="bottom">
-                    <Link href={`/${currentPuzzle.slug}`}>
-                        <h2 className="text-lg font-semibold dark:text-white">{currentPuzzle.title}</h2>
-                    </Link>
-                </Tooltip>
-                {currentSolution && <PuzzleLinkButton
-                    link={`/${currentPuzzle.slug}/${format(selectedDate.toDate(userTimeZone), "yyyy/MM/dd")}`}/>}
-            </div>
-            <div className="flex tems-center justify-center">
-                {previousPuzzleDate && <div className="flex flex-1 justify-start">
-                    <Tooltip delay={500} content={(<p className="text-center">Previous
-                        Solution<br/>{dateFormatter.format(previousPuzzleDate.toDate(userTimeZone))}</p>)}>
-                        <Link
-                            href={`/${currentPuzzle.slug}/${format(previousPuzzleDate.toDate(userTimeZone), "yyyy/MM/dd")}`}>
-                            <ChevronLeftIcon className="w-5 -ml-5"/>
-                        </Link>
+        <section aria-label="Puzzle" className="glass flex items-center rounded-[20px] px-1 py-2 sm:rounded-[22px] sm:px-1.5 sm:py-2.5">
+            <SolutionStep puzzle={currentPuzzle} date={previousPuzzleDate} label="Previous solution">
+                <ChevronLeftIcon size={20}/>
+            </SolutionStep>
+            <div className="flex min-w-0 flex-1 flex-col items-center">
+                <div className="flex max-w-full items-center">
+                    {currentSolution && <span aria-hidden="true" className="w-9 shrink-0"/>}
+                    <Tooltip content={currentPuzzle.description} delay={300} closeDelay={0} placement="bottom"
+                             isDisabled={!currentPuzzle.description}>
+                        {puzzleModal ?
+                            <button type="button" onClick={puzzleModal.onOpen}
+                                    className="flex h-9 min-w-0 cursor-pointer items-center gap-1 rounded-[10px] px-1.5 transition-colors hover:bg-hover">
+                                <span aria-hidden="true" className="w-4 shrink-0"/>
+                                {title}
+                                <ChevronDownIcon size={16} className="shrink-0 text-fg-sub"/>
+                            </button> :
+                            <span className="flex h-9 min-w-0 items-center px-2.5">{title}</span>}
                     </Tooltip>
-                </div>}
-                <h3 className="flex grow justify-center px-2 text-sm dark:text-white">{dateFormatter.format(selectedDate.toDate(userTimeZone))}</h3>
-                {nextPuzzleDate && <div className="flex flex-1 justify-end">
-                    <Tooltip delay={500} content={(<p className="text-center">Next
-                        Solution<br/>{dateFormatter.format(nextPuzzleDate.toDate(userTimeZone))}</p>)}>
-                        <Link
-                            href={`/${currentPuzzle.slug}/${format(nextPuzzleDate.toDate(userTimeZone), "yyyy/MM/dd")}`}>
-                            <ChevronRightIcon className="w-5 -mr-5"/>
-                        </Link>
-                    </Tooltip>
-                </div>}
+                    {currentSolution && <PuzzleLinkButton
+                        link={`/${currentPuzzle.slug}/${format(selectedDate.toDate(userTimeZone), "yyyy/MM/dd")}`}/>}
+                </div>
+                <button type="button" aria-label="Choose solution date" onClick={archiveModal?.onOpen}
+                        className="flex h-[30px] cursor-pointer items-center gap-1.5 rounded-[10px] px-2.5 text-[13px] font-medium text-fg-sub transition-colors hover:bg-hover hover:text-fg sm:text-sm">
+                    <CalendarIcon size={14}/>
+                    {dateFormatter.format(selectedDate.toDate(userTimeZone))}
+                </button>
             </div>
-        </div>
+            <SolutionStep puzzle={currentPuzzle} date={nextPuzzleDate} label="Next solution">
+                <ChevronRightIcon size={20}/>
+            </SolutionStep>
+        </section>
     )
 }

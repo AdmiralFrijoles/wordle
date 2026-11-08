@@ -1,15 +1,22 @@
 ﻿"use client";
 
-import {useDisclosure, Button, Image} from "@heroui/react";
+import {useDisclosure, Image} from "@heroui/react";
 import HeaderIcon from "@/components/header/HeaderIcon";
-import {UserCircleIcon} from "@heroicons/react/24/outline";
 import BaseModal from "@/components/modal/ModalBase";
 import {useSession} from "next-auth/react";
 import {useDiscordGuild} from "@/providers/DiscordGuildProvider";
+import {UserIcon} from "@/components/icons";
 
 type Props = {
     signOutAction: () => Promise<void>;
     userImage: string | null | undefined;
+}
+
+function Avatar({src, alt}: { src: string | null | undefined, alt: string }) {
+    if (!src) {
+        return <UserIcon/>;
+    }
+    return <Image className="h-7 w-7 rounded-full" src={src} alt={alt} width="28" height="28" removeWrapper={true}/>;
 }
 
 export default function UserModal({signOutAction, userImage}: Props) {
@@ -22,39 +29,41 @@ export default function UserModal({signOutAction, userImage}: Props) {
         window.location.reload();
     }
 
+    if (sessionStatus === "loading") {
+        return (
+            <span className="flex h-11 w-11 items-center justify-center text-fg-icon">
+                <Avatar src={userImage} alt=""/>
+            </span>
+        );
+    }
+
+    if (sessionStatus !== "authenticated" || !session) {
+        return null;
+    }
+
     return (
         <>
-            {sessionStatus === "loading" && (
-                <div className="w-6 h-6" onClick={onOpen}>
-                    {userImage ?
-                        <Image className="w-6 h-6 rounded-full" src={userImage} alt="User" width="24" height="24"/> :
-                        <UserCircleIcon className="dark:stroke-white w-6 h-6"/>}
+            <HeaderIcon label="Account" onPress={onOpen}>
+                <Avatar src={userImage} alt=""/>
+            </HeaderIcon>
+            <BaseModal title="Account" isOpen={isOpen} onOpenChange={onOpenChange}>
+                <div className="glass flex items-center gap-3.5 rounded-[18px] px-4 py-3.5">
+                    {userImage &&
+                        <Image className="h-11 w-11 rounded-full" src={userImage} alt="" width="44" height="44"
+                               removeWrapper={true}/>}
+                    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <span className="truncate text-base font-semibold text-fg">{session.user.name}</span>
+                        {guild &&
+                            <span className="truncate text-[13px] text-fg-sub">Member of {guild.name}</span>}
+                    </div>
                 </div>
-                )}
-            {sessionStatus === "authenticated" && session && (
-                <>
-                    <HeaderIcon tooltipContent="User Menu">
-                        <div className="w-6 h-6" onClick={onOpen}>
-                            {userImage ?
-                                <Image className="w-6 h-6 rounded-full" src={userImage} alt={session.user.name ?? "User"} width="24" height="24"/> :
-                                <UserCircleIcon className="dark:stroke-white w-6 h-6"/>}
-                        </div>
-                    </HeaderIcon>
-                    <BaseModal title="User" isOpen={isOpen} onOpenChange={onOpenChange}>
-                        <h2 className="flex w-full justify-center">Welcome, {session.user.name}</h2>
-                        {guild && <p className="flex w-full justify-center text-sm">You&#39;re a member of&nbsp;<span className="italic">{guild.name}</span></p>}
-                        <hr className="mt-4 mb-4 border-gray-500"/>
-                        <form action={signOut}>
-                            <Button
-                                type="submit"
-                                className="flex w-full justify-center items-center rounded-md p-1 bg-indigo-600 hover:bg-indigo-700 text-white"
-                            >
-                                Sign Out
-                            </Button>
-                        </form>
-                    </BaseModal>
-                </>
-            )}
+                <form action={signOut}>
+                    <button type="submit"
+                            className="btn-primary h-[52px] w-full cursor-pointer rounded-2xl text-base font-bold">
+                        Sign Out
+                    </button>
+                </form>
+            </BaseModal>
         </>
     )
 }

@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import classnames from 'classnames'
+import {useId} from "react";
 
 type Props = {
     settingName: string
@@ -10,34 +11,33 @@ type Props = {
 }
 
 export default function SettingsToggle({settingName, flag, handleFlag, description}: Props) {
-    const toggleHolder = classnames(
-        'w-14 h-8 flex shrink-0 items-center bg-gray-300 dark:bg-gray-600 rounded-full p-1 duration-300 ease-in-out cursor-pointer',
-        {
-            'bg-green-400 dark:bg-green-600': flag,
-        }
+    const labelId = useId();
+    const descriptionId = useId();
+
+    const track = classnames(
+        'flex h-8 w-[52px] shrink-0 cursor-pointer items-center rounded-full p-[3px] transition-colors duration-300',
+        flag
+            ? 'justify-end bg-linear-to-b from-[#2fc76d] to-[#1fa855] shadow-[0_4px_10px_-6px_rgb(34_179_94/0.4)]'
+            : 'justify-start bg-switch-off'
     )
-    const toggleButton = classnames(
-        'bg-white dark:bg-gray-300 w-6 h-6 rounded-full shadow-md transform duration-300 ease-in-out cursor-pointer',
-        {
-            'translate-x-6': flag,
-        }
+    const knob = classnames(
+        'h-[26px] w-[26px] rounded-full shadow-[0_2px_6px_rgb(0_0_0/0.3)]',
+        flag ? 'bg-white' : 'bg-switch-knob-off'
     )
 
     return (
-        <>
-            <div className="flex justify-between gap-4 py-3">
-                <div className="mt-0 text-left text-gray-500 dark:text-gray-300">
-                    <p className="leading-none">{settingName}</p>
-                    {description && (
-                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-300">
-                            {description}
-                        </p>
-                    )}
-                </div>
-                <div className={toggleHolder} onClick={() => handleFlag(!flag)}>
-                    <div className={toggleButton} />
-                </div>
+        <div className="flex items-center gap-4 px-4 py-3.5">
+            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span id={labelId} className="text-base font-semibold text-fg">{settingName}</span>
+                {description && (
+                    <span id={descriptionId} className="text-[13px] leading-snug text-fg-sub">{description}</span>
+                )}
             </div>
-        </>
+            <button type="button" role="switch" aria-checked={flag} aria-labelledby={labelId}
+                    aria-describedby={description ? descriptionId : undefined}
+                    className={track} onClick={() => handleFlag(!flag)}>
+                <span className={knob}/>
+            </button>
+        </div>
     )
 }
