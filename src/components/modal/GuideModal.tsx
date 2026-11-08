@@ -1,10 +1,10 @@
 ﻿"use client";
 
-import {InformationCircleIcon} from "@heroicons/react/24/outline";
 import HeaderIcon from "@/components/header/HeaderIcon";
 import {useDisclosure} from "@heroui/react";
 import BaseModal from "@/components/modal/ModalBase";
 import GameGridCell from "@/components/game/cell";
+import {HelpIcon} from "@/components/icons";
 
 
 export default function GuideModal() {
@@ -12,58 +12,48 @@ export default function GuideModal() {
 
     return (
         <>
-            <HeaderIcon tooltipContent="How To Play">
-                <InformationCircleIcon className="dark:stroke-white" onClick={onOpen}/>
+            <HeaderIcon label="How To Play" onPress={onOpen}>
+                <HelpIcon/>
             </HeaderIcon>
             <BaseModal title="How To Play" isOpen={isOpen} onOpenChange={onOpenChange}>
-                <div className="text-center">
-                    <p className="text-sm text-gray-500 dark:text-gray-300">
+                <div className="flex flex-col gap-5 text-sm leading-relaxed text-fg-sub">
+                    <p>
                         Guess the word in 6 tries. After each guess, the color of the tiles will
                         change to show how close your guess was to the word.
                     </p>
 
-                    <div className="mb-1 mt-4 flex justify-center">
-                        <GameGridCell
-                            isRevealing={true}
-                            isCompleted={true}
-                            value="W"
-                            status="Correct"
-                        />
-                        <GameGridCell value="E" isCompleted={true}/>
-                        <GameGridCell value="A" isCompleted={true}/>
-                        <GameGridCell value="R" isCompleted={true}/>
-                        <GameGridCell value="Y" isCompleted={true}/>
+                    <div className="flex flex-col gap-2">
+                        <div className="flex gap-1.5">
+                            <GameGridCell size="small" isRevealing={true} isCompleted={true} value="W" status="Correct"/>
+                            <GameGridCell size="small" value="E" isCompleted={true}/>
+                            <GameGridCell size="small" value="A" isCompleted={true}/>
+                            <GameGridCell size="small" value="R" isCompleted={true}/>
+                            <GameGridCell size="small" value="Y" isCompleted={true}/>
+                        </div>
+                        <p>The letter W is in the word and in the correct spot.</p>
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-300">
-                        The letter W is in the word and in the correct spot.
-                    </p>
 
-                    <div className="mb-1 mt-4 flex justify-center">
-                        <GameGridCell value="P" isCompleted={true}/>
-                        <GameGridCell value="I" isCompleted={true}/>
-                        <GameGridCell
-                            isRevealing={true}
-                            isCompleted={true}
-                            value="L"
-                            status="Present"
-                        />
-                        <GameGridCell value="O" isCompleted={true}/>
-                        <GameGridCell value="T" isCompleted={true}/>
+                    <div className="flex flex-col gap-2">
+                        <div className="flex gap-1.5">
+                            <GameGridCell size="small" value="P" isCompleted={true}/>
+                            <GameGridCell size="small" value="I" isCompleted={true}/>
+                            <GameGridCell size="small" isRevealing={true} isCompleted={true} value="L" status="Present"/>
+                            <GameGridCell size="small" value="O" isCompleted={true}/>
+                            <GameGridCell size="small" value="T" isCompleted={true}/>
+                        </div>
+                        <p>The letter L is in the word but in the wrong spot.</p>
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-300">
-                        The letter L is in the word but in the wrong spot.
-                    </p>
 
-                    <div className="mb-1 mt-4 flex justify-center">
-                        <GameGridCell value="V" isCompleted={true}/>
-                        <GameGridCell value="A" isCompleted={true}/>
-                        <GameGridCell value="G" isCompleted={true}/>
-                        <GameGridCell isRevealing={true} isCompleted={true} value="U" status="Absent"/>
-                        <GameGridCell value="E" isCompleted={true}/>
+                    <div className="flex flex-col gap-2">
+                        <div className="flex gap-1.5">
+                            <GameGridCell size="small" value="V" isCompleted={true}/>
+                            <GameGridCell size="small" value="A" isCompleted={true}/>
+                            <GameGridCell size="small" value="G" isCompleted={true}/>
+                            <GameGridCell size="small" isRevealing={true} isCompleted={true} value="U" status="Absent"/>
+                            <GameGridCell size="small" value="E" isCompleted={true}/>
+                        </div>
+                        <p>The letter U is not in the word in any spot.</p>
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-300">
-                        The letter U is not in the word in any spot.
-                    </p>
                 </div>
             </BaseModal>
         </>

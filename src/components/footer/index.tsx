@@ -1,10 +1,9 @@
 ﻿import {APP_VERSION} from "@/constants";
 
-
 export default function Footer() {
     return (
-        <div className="flex justify-center items-center space-x-2 pb-1 pt-1">
-            <p className="text-tiny text-gray-400 dark:text-slate-700">v{APP_VERSION}</p>
-        </div>
+        <footer className="hidden justify-center px-6 pb-5 sm:flex">
+            <p className="text-xs text-fg-muted">v{APP_VERSION}</p>
+        </footer>
     )
 }

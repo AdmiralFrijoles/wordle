@@ -1,7 +1,8 @@
 ﻿"use client";
 
-import {XCircleIcon} from "@heroicons/react/24/outline";
+import React from "react";
 import {Modal, ModalContent, ModalHeader, ModalBody} from "@heroui/react";
+import {CloseIcon} from "@/components/icons";
 
 type Props = {
     title: string | React.ReactNode;
@@ -24,28 +25,34 @@ export default function BaseModal({
         <Modal isOpen={isOpen}
                onOpenChange={onOpenChange}
                isDismissable={isDismissible}
-               isKeyboardDismissDisabled={!isDismissible}
-               placement={placement ?? "center"}
-               backdrop="blur"
+               isKeyboardDismissDisabled={isDismissible === false}
+               placement={placement ?? "auto"}
+               backdrop="opaque"
                scrollBehavior="inside"
+               hideCloseButton={true}
                classNames={{
-                   body: "p-0 mt-1",
-                   base: "rounded-lg bg-white px-4 pt-5 pb-4 text-left align-bottom shadow-xl transition-all dark:bg-gray-800 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:align-middle",
-                   header: "text-center text-lg font-medium leading-6 text-gray-900 dark:text-gray-100 pt-0 pb-1",
+                   backdrop: "bg-[var(--scrim)] backdrop-blur-[4px]",
+                   base: "sheet-surface text-fg m-0 w-full max-w-full rounded-t-[28px] rounded-b-none border-b-0 sm:mx-4 sm:my-8 sm:max-w-[420px] sm:rounded-[28px] sm:border-b",
+                   header: "flex items-center justify-between gap-3 px-5 pt-2 pb-1 sm:px-6 sm:pt-5",
+                   body: "gap-4 px-5 pt-1 pb-[max(28px,env(safe-area-inset-bottom))] sm:px-6 sm:pb-6",
                }}
-               closeButton={(
-                   <button tabIndex={0} aria-pressed="false" aria-label="close modal" className="absolute right-4 top-4">
-                       <XCircleIcon className="h-6 w-6 cursor-pointer animated dark:stroke-white"/>
-                   </button>
-               )}
         >
             <ModalContent>
-                <>
-                    <ModalHeader className="flex flex-col">{title}</ModalHeader>
-                    <ModalBody>
-                        {children}
-                    </ModalBody>
-                </>
+                {(onClose) => (
+                    <>
+                        <div aria-hidden="true" className="mx-auto mt-2.5 h-[5px] w-[38px] shrink-0 rounded-full bg-grabber sm:hidden"/>
+                        <ModalHeader>
+                            <div className="min-w-0 text-xl font-bold tracking-[-0.01em]">{title}</div>
+                            <button type="button" aria-label="Close" onClick={onClose}
+                                    className="-mr-2.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl text-fg-sub transition-colors hover:bg-hover hover:text-fg">
+                                <CloseIcon size={20}/>
+                            </button>
+                        </ModalHeader>
+                        <ModalBody>
+                            {children}
+                        </ModalBody>
+                    </>
+                )}
             </ModalContent>
         </Modal>
     )

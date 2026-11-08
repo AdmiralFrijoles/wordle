@@ -7,13 +7,16 @@ type Props = {
     currentRowIndex: number;
     currentRowClassName: string;
     isLoading?: boolean | undefined;
+    isPlaying?: boolean;
 };
 
-export default function GameGrid({rows, isRevealing, currentRowIndex, currentRowClassName, isLoading}: Props) {
+export default function GameGrid({rows, isRevealing, currentRowIndex, currentRowClassName, isLoading, isPlaying}: Props) {
     return (
-        <div className="flex grow flex-col justify-center pb-6">
+        <div className="flex grow flex-col items-center justify-center gap-1.5 py-3 sm:gap-2 sm:py-0">
             {rows.map((play, rowIndex) => {
-                const classes = `flex justify-center mb-1 ${currentRowIndex === rowIndex ? currentRowClassName : ""}`;
+                const isCurrentRow = currentRowIndex === rowIndex;
+                const activeIndex = isCurrentRow && isPlaying ? play.findIndex(cell => !cell.value) : -1;
+                const classes = `flex gap-1.5 sm:gap-2 ${isCurrentRow ? currentRowClassName : ""}`;
                 return (
                     <div key={rowIndex} className={classes}>
                         {play.map((guess, idx) => (
@@ -23,6 +26,7 @@ export default function GameGrid({rows, isRevealing, currentRowIndex, currentRow
                                 value={guess.value}
                                 status={guess.status}
                                 position={idx}
+                                isActive={idx === activeIndex}
                                 isRevealing={isRevealing && rowIndex === currentRowIndex - 1}
                                 isCompleted={play.every(c => c.status !== "Guessing")}
                             />

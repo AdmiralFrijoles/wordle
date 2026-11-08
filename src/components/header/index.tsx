@@ -14,24 +14,21 @@ export default async function Header() {
     const puzzleCount = await getPuzzleCount();
 
     return (
-        <div className="navbar border-b-2 border-slate-200 dark:border-slate-700">
-            <div className="navbar-content px-5">
-                <div className="flex-1 flex justify-start mr-auto space-x-2">
+        <header className="w-full shrink-0 sm:border-b sm:border-line">
+            <div className="mx-auto flex h-[60px] max-w-[1120px] items-center justify-between gap-4 pr-1.5 pl-[18px] sm:h-[68px] sm:px-6">
+                <Link className="prevent-select truncate text-[21px] font-extrabold tracking-[-0.02em] text-fg sm:text-[22px]"
+                      href="/">
+                    {headerTitle}
+                </Link>
+                <nav aria-label="Game menu" className="flex gap-0.5 sm:gap-1">
                     <GuideModal/>
-                    <PuzzleSelectModal hasMultiplePuzzles={puzzleCount > 1}/>
-                    <ArchiveModal/>
-                </div>
-                    <Link className="prevent-select mx-4 text-xl font-bold text-nowrap dark:text-white"
-                          href="/"
-                    >
-                        {headerTitle}
-                    </Link>
-                <div className="flex-1 flex justify-end ml-auto space-x-2">
                     <RankingModal appTitle={headerTitle}/>
                     <CurrentUser/>
                     <SettingsModal/>
-                </div>
+                </nav>
             </div>
-        </div>
+            <PuzzleSelectModal hasMultiplePuzzles={puzzleCount > 1}/>
+            <ArchiveModal/>
+        </header>
     )
 }

@@ -44,14 +44,16 @@ export default function ChangelogModal() {
     });
 
     return (
-        <BaseModal placement="top" title={(
-            <>
+        <BaseModal title={(
+            <div className="flex flex-col gap-0.5">
                 <h2>What&#39;s New</h2>
-                <p className="text-sm text-gray-400">{dateFormatter.format(releaseDate.toDate(userTimeZone))}</p>
-                <p className="text-tiny text-gray-400">v{APP_VERSION}</p>
-            </>
+                <p className="text-[13px] font-medium tracking-normal text-fg-sub">
+                    {dateFormatter.format(releaseDate.toDate(userTimeZone))}, v{APP_VERSION}
+                </p>
+            </div>
         )} isOpen={isOpen} onOpenChange={onOpenChange}>
-            <div className="prose dark:prose-invert prose-sm prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-h5:text-sm">
+            <div className="prose prose-sm dark:prose-invert prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-h5:text-sm">
+
                 {content}
             </div>
         </BaseModal>

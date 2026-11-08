@@ -1,8 +1,15 @@
 ﻿import {Row} from "@/types";
 import {useEffect} from "react";
 import Key from "@/components/game/key";
-import {BackspaceIcon} from "@heroicons/react/24/outline";
+import {BackspaceIcon} from "@/components/icons";
 import {getKeyboardGuessStatuses} from "@/lib/guesses";
+
+function isKeyForSomethingElse(e: KeyboardEvent): boolean {
+    const target = e.target as HTMLElement | null;
+    return e.ctrlKey || e.metaKey || e.altKey
+        || !!target?.closest("input, textarea, select")
+        || document.querySelector("[role='dialog']") !== null;
+}
 
 const keyboardLayout = [
     ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
@@ -30,31 +37,40 @@ export default function Keyboard({
                                      disabled,
 }: Props) {
     const keyboardRowCount = keyboardLayout.length;
-    const statuses = getKeyboardGuessStatuses(solution, rows);
+    const statuses = getKeyboardGuessStatuses(solution, isRevealing ? rows.slice(0, -1) : rows);
 
     useEffect(() => {
         function listener(e: KeyboardEvent) {
+            if (isKeyForSomethingElse(e)) {
+                return;
+            }
             if (e.code === "Enter") {
-                onSubmit();
+                // Focus often sits on the button that opened the last sheet. Enter must submit, not reopen it.
+                e.preventDefault();
+                if (!e.repeat) {
+                    onSubmit();
+                }
             } else if (e.code === "Backspace") {
                 onDelete();
-            } else {
+            } else if (!e.repeat) {
                 const key = e.key.toUpperCase();
-                if (key.length === 1 && key >= "A" && key <= "Z")
+                if (key.length === 1 && key >= "A" && key <= "Z") {
                     onLetterClick(key);
+                }
             }
         }
-        window.addEventListener("keyup", listener);
+        window.addEventListener("keydown", listener);
         return () => {
-            window.removeEventListener("keyup", listener);
+            window.removeEventListener("keydown", listener);
         };
     })
 
     return (
-        <div>
+        <div role="group" aria-label="Keyboard" className="flex shrink-0 flex-col gap-2">
+
             {keyboardLayout.map((row, rowIndex) => (
             <div key={rowIndex}
-                 className={rowIndex < keyboardRowCount - 1 ? "mb-1 flex justify-center" : "flex justify-center"}>
+                 className={rowIndex === 1 ? "flex gap-1.5 px-[4.5%]" : "flex gap-1.5"}>
                 {(rowIndex === keyboardRowCount - 1) &&
                 <Key value="ENTER" onClick={onSubmit} disabled={disabled} />}
                 {row.map(key => (
@@ -66,8 +82,8 @@ export default function Keyboard({
                          isRevealing={isRevealing}/>
                 ))}
                 {(rowIndex === keyboardRowCount - 1) &&
-                <Key value="DELETE" onClick={onDelete} disabled={disabled}>
-                    <BackspaceIcon className="h-5 w-[1.3rem] mt-[0.1rem] stroke-2"/>
+                <Key value="DELETE" label="Delete" onClick={onDelete} disabled={disabled}>
+                    <BackspaceIcon/>
                 </Key>}
             </div>
             ))}

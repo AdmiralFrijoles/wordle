@@ -1,6 +1,7 @@
 import "../globals.css";
 import React from "react";
-import type {Metadata} from 'next'
+import type {Metadata, Viewport} from 'next'
+import {Inter} from "next/font/google";
 import Header from "@/components/header";
 import {Providers} from "@/providers";
 import {Toaster} from "react-hot-toast";
@@ -14,6 +15,18 @@ import path from "node:path";
 import {VersionChecker} from "@/components/VersionChecker";
 import {ServiceWorker} from "@/components/ServiceWorker";
 
+const inter = Inter({
+    subsets: ["latin"],
+    variable: "--font-inter",
+    display: "swap",
+});
+
+export const viewport: Viewport = {
+    themeColor: [
+        {media: "(prefers-color-scheme: dark)", color: "#0a0f1d"},
+        {media: "(prefers-color-scheme: light)", color: "#f3f5fa"},
+    ],
+};
 
 export async function generateMetadata(): Promise<Metadata> {
     const title = await getAppSetting<string>(SETTING_APP_TITLE);
@@ -226,22 +239,19 @@ export default async function RootLayout({children}: Readonly<{
     const hasChangelog = existsSync(changelogFilePath);
 
     return (
-        <html lang="en" suppressHydrationWarning={true} className="dark">
+        <html lang="en" suppressHydrationWarning={true} className={`dark ${inter.variable}`}>
         <body>
         <Providers>
             <ServiceWorker/>
-            <div className="flex h-full flex-col">
-                <Toaster position="top-center"/>
-                <div className="flex flex-col h-screen">
-                    <Header/>
-                    <div
-                        className="mx-auto flex w-full grow flex-col px-1 pb-8 pt-2 sm:px-6 md:max-w-7xl lg:px-8">
-                        {children}
-                    </div>
-                    <Footer/>
-                </div>
-                {hasChangelog && <ChangelogModal/>}
+            <Toaster position="top-center" containerStyle={{top: 72}}/>
+            <div className="flex min-h-dvh flex-col">
+                <Header/>
+                <main className="mx-auto flex w-full max-w-[540px] grow flex-col px-4 pt-1 pb-[max(16px,env(safe-area-inset-bottom))] sm:pt-6 sm:pb-8">
+                    {children}
+                </main>
+                <Footer/>
             </div>
+            {hasChangelog && <ChangelogModal/>}
             <VersionChecker/>
         </Providers>
         </body>

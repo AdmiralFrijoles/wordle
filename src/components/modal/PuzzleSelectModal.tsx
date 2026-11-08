@@ -1,18 +1,26 @@
 ﻿"use client";
 
-import {PuzzlePieceIcon} from "@heroicons/react/24/outline";
-import HeaderIcon from "@/components/header/HeaderIcon";
 import BaseModal from "@/components/modal/ModalBase";
-import {useDisclosure, Card, CardBody, CardHeader, Skeleton} from "@heroui/react";
+import {useDisclosure, Skeleton} from "@heroui/react";
 import {useAsync} from "react-use";
 import {listPuzzlesForUser} from "@/lib/puzzle-service";
 import {useState} from "react";
 import {Puzzle} from "@prisma/client";
 import {useCurrentPuzzle} from "@/providers/PuzzleProvider";
 import Link from "next/link";
+import {useGlobalModal} from "@/providers/GlobalModalProvider";
+import {ChevronRightIcon} from "@/components/icons";
+
+const iconStyles = [
+    "hit-correct [--hit-glow:0]",
+    "hit-present [--hit-glow:0]",
+    "tile-absent",
+];
 
 export default function PuzzleSelectModal({hasMultiplePuzzles}: { hasMultiplePuzzles: boolean}) {
-    const {isOpen, onOpen, onOpenChange} = useDisclosure();
+    const disclosure = useDisclosure();
+    useGlobalModal("puzzles", hasMultiplePuzzles ? disclosure : undefined);
+    const {isOpen, onClose, onOpenChange} = disclosure;
     const [puzzles, setPuzzles] = useState<Puzzle[]>([]);
     const [isLoadingPuzzles, setIsLoadingPuzzles] = useState(true);
     const {currentPuzzle} = useCurrentPuzzle();
@@ -28,90 +36,33 @@ export default function PuzzleSelectModal({hasMultiplePuzzles}: { hasMultiplePuz
         }
     }, [isOpen])
 
-    if (!hasMultiplePuzzles) return null;
+    if (!hasMultiplePuzzles) {
+        return null;
+    }
 
     return (
-        <>
-            <HeaderIcon tooltipContent="Choose Puzzle">
-                <PuzzlePieceIcon className="dark:stroke-white" onClick={onOpen}/>
-            </HeaderIcon>
-
-            <BaseModal title="Available Puzzles" isOpen={isOpen} onOpenChange={onOpenChange}>
-                <div className="grid grid-flow-row-dense grid-cols-1 gap-2">
-                    {isLoadingPuzzles ? (
-                        <>
-                            <div className="p-0 m-0">
-                                <Card
-                                    className="bg-transparent shadow-none rounded border-2 border-solid
-                                active:bg-slate-200 bg-slate-200
-                                dark:bg-slate-600 border-slate-200 dark:border-slate-600"
-                                >
-                                    <CardHeader className="justify-start py-2">
-                                        <Skeleton className="skeleton">
-                                            <h4 className="font-bold text-medium">Puzzle Title</h4>
-                                        </Skeleton>
-                                    </CardHeader>
-                                    <CardBody className="pt-0">
-                                        <Skeleton className="skeleton">
-                                            <p className="text-sm">Puzzle description goes here. This is where the
-                                                puzzle&#39;s description will show up, if it has one.</p>
-                                        </Skeleton>
-                                    </CardBody>
-                                </Card>
-                            </div>
-                            <div className="p-0 m-0">
-                                <Card
-                                    className="bg-transparent shadow-none rounded border-2 border-solid
-                                active:bg-slate-200 bg-slate-200
-                                dark:bg-slate-600 border-slate-200 dark:border-slate-600"
-                                >
-                                    <CardHeader className="justify-start py-2">
-                                        <Skeleton className="skeleton">
-                                            <h4 className="font-bold text-medium">Another Puzzle Title</h4>
-                                        </Skeleton>
-                                    </CardHeader>
-                                </Card>
-                            </div>
-                            <div className="p-0 m-0">
-                                <Card
-                                    className="bg-transparent shadow-none rounded border-2 border-solid
-                                active:bg-slate-200 bg-slate-200
-                                dark:bg-slate-600 border-slate-200 dark:border-slate-600"
-                                >
-                                    <CardHeader className="justify-start py-2">
-                                        <Skeleton className="skeleton">
-                                            <h4 className="font-bold text-medium">Some Puzzle Name</h4>
-                                        </Skeleton>
-                                    </CardHeader>
-                                    <CardBody className="pt-0">
-                                        <Skeleton className="skeleton">
-                                            <p className="text-sm">Puzzle description goes here.</p>
-                                        </Skeleton>
-                                    </CardBody>
-                                </Card>
-                            </div>
-                        </>
-                    ) : puzzles
+        <BaseModal title="Available Puzzles" isOpen={isOpen} onOpenChange={onOpenChange}>
+            <nav aria-label="Puzzles" className="flex flex-col gap-2.5">
+                {isLoadingPuzzles ?
+                    [0, 1, 2].map(i => <Skeleton key={i} className="skeleton h-[68px] rounded-[18px]"/>) :
+                    puzzles
                         .filter(puzzle => puzzle.id !== currentPuzzle?.id)
                         .map((puzzle, idx) => (
-                            <Link key={idx} href={`/${puzzle.slug}`} className="p-0 m-0">
-                                <Card
-                                    className="bg-transparent shadow-none rounded border-2 border-solid
-                                hover:bg-slate-100 active:bg-slate-200 bg-slate-200
-                                dark:hover:bg-slate-700 dark:bg-slate-600 border-slate-200 dark:border-slate-600"
-                                >
-                                    <CardHeader className="justify-start py-2">
-                                        <h4 className="font-bold text-medium">{puzzle.title}</h4>
-                                    </CardHeader>
+                            <Link key={puzzle.id} href={`/${puzzle.slug}`} onClick={onClose}
+                                  className="glass flex min-h-16 items-center gap-3.5 rounded-[18px] py-3.5 pr-3 pl-4 text-fg">
+                                <span aria-hidden="true"
+                                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-[17px] font-extrabold ${iconStyles[idx % iconStyles.length]}`}>
+                                    {puzzle.title.trim().charAt(0).toUpperCase()}
+                                </span>
+                                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                                    <span className="text-base font-semibold">{puzzle.title}</span>
                                     {puzzle.description &&
-                                        <CardBody className="pt-0">
-                                            <p className="text-sm">{puzzle.description}</p>
-                                        </CardBody>}
-                                </Card>
-                        </Link>
-                    ))}
-                </div>
-            </BaseModal>
-        </>
+                                        <span className="text-[13px] leading-snug text-fg-sub">{puzzle.description}</span>}
+                                </span>
+                                <ChevronRightIcon size={18} className="shrink-0 text-fg-muted"/>
+                            </Link>
+                        ))}
+            </nav>
+        </BaseModal>
     )
 }
