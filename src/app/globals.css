@@ -308,11 +308,10 @@
     animation: jiggle 250ms linear;
   }
 
-  /* Every tile is a slab: front and back faces 8px apart with thin layers between them for depth. */
-  .tile-3d {
-    perspective: 420px;
-  }
-
+  /*
+   * A turning tile is a slab drawn as separate pieces, each with its own perspective. There is no
+   * shared 3D context, because Firefox leaves seams on preserve-3d scenes. The faces swap at the halfway point.
+   */
   .tile-swell {
     animation: tileSwell 600ms ease-in-out var(--flip-delay) both;
   }
@@ -322,16 +321,6 @@
     width: 100%;
     height: 100%;
     border-radius: inherit;
-    transform-style: preserve-3d;
-  }
-
-  .tile-inner.is-flipped {
-    transform: rotateX(180deg);
-  }
-
-  /* One eased segment keeps the turn fastest at the edge. Easing each half stalls it edge on. */
-  .tile-inner.is-flipping {
-    animation: tileFlip 600ms cubic-bezier(.65, 0, .35, 1) var(--flip-delay) backwards;
   }
 
   .tile-face {
@@ -344,22 +333,29 @@
     border-width: 1.5px;
     border-style: solid;
     border-radius: inherit;
-    backface-visibility: hidden;
   }
 
+  /* One eased segment keeps the turn fastest at the edge. Easing each half stalls it edge on. */
   .tile-front {
-    transform: translateZ(4px);
+    opacity: 0;
+    transform: perspective(420px) rotateX(180deg) translateZ(4px);
+    animation:
+      flipFront 600ms cubic-bezier(.65, 0, .35, 1) var(--flip-delay) backwards,
+      firstHalf 600ms linear var(--flip-delay) backwards;
   }
 
-  .is-flipping .tile-front.tile-typed {
+  .tile-front.tile-typed {
     background: var(--tile-typed-solid);
   }
 
   .tile-back {
-    transform: rotateX(180deg) translateZ(4px);
+    transform: perspective(420px) rotateX(180deg) rotateX(180deg) translateZ(4px);
+    animation:
+      flipBack 600ms cubic-bezier(.65, 0, .35, 1) var(--flip-delay) backwards,
+      secondHalf 600ms linear var(--flip-delay) backwards;
   }
 
-  /* Edges stand at 90 degrees to the faces, so at rest they would show as hairlines. Only show them mid turn. */
+  /* Only the lower edge ever faces the viewer during a downward turn. */
   .tile-edge {
     position: absolute;
     left: 6px;
@@ -369,18 +365,10 @@
     background: var(--tile-edge);
     opacity: 0;
     pointer-events: none;
-  }
-
-  .tile-edge-top {
-    transform: translateY(calc(var(--tile-h) / -2)) rotateX(90deg);
-  }
-
-  .tile-edge-bottom {
-    transform: translateY(calc(var(--tile-h) / 2)) rotateX(-90deg);
-  }
-
-  .is-flipping .tile-edge {
-    animation: edgeShow 600ms linear var(--flip-delay) backwards;
+    transform: perspective(420px) rotateX(180deg) translateY(calc(var(--tile-h) / 2)) rotateX(-90deg);
+    animation:
+      flipEdge 600ms cubic-bezier(.65, 0, .35, 1) var(--flip-delay) backwards,
+      edgeShow 600ms linear var(--flip-delay) backwards;
   }
 
   .tile-shade {
@@ -389,14 +377,13 @@
     background: #000;
     opacity: 0;
     pointer-events: none;
-    backface-visibility: hidden;
   }
 
-  .is-flipping .tile-front .tile-shade {
+  .tile-front .tile-shade {
     animation: shadeOut 600ms cubic-bezier(.65, 0, .35, 1) var(--flip-delay) backwards;
   }
 
-  .is-flipping .tile-back .tile-shade {
+  .tile-back .tile-shade {
     animation: shadeIn 600ms cubic-bezier(.65, 0, .35, 1) var(--flip-delay) backwards;
   }
 
@@ -439,7 +426,8 @@
   @media (prefers-reduced-motion: reduce) {
     .tile-swell,
     .tile-edge,
-    .tile-inner,
+    .tile-front,
+    .tile-back,
     .tile-shade,
     .win-hop,
     .win-sheen,
@@ -455,12 +443,48 @@
   }
 }
 
-@keyframes tileFlip {
+@keyframes flipFront {
   from {
-    transform: rotateX(0deg);
+    transform: perspective(420px) rotateX(0deg) translateZ(4px);
   }
   to {
-    transform: rotateX(180deg);
+    transform: perspective(420px) rotateX(180deg) translateZ(4px);
+  }
+}
+
+@keyframes flipBack {
+  from {
+    transform: perspective(420px) rotateX(0deg) rotateX(180deg) translateZ(4px);
+  }
+  to {
+    transform: perspective(420px) rotateX(180deg) rotateX(180deg) translateZ(4px);
+  }
+}
+
+@keyframes flipEdge {
+  from {
+    transform: perspective(420px) rotateX(0deg) translateY(calc(var(--tile-h) / 2)) rotateX(-90deg);
+  }
+  to {
+    transform: perspective(420px) rotateX(180deg) translateY(calc(var(--tile-h) / 2)) rotateX(-90deg);
+  }
+}
+
+@keyframes firstHalf {
+  0%, 49.9% {
+    opacity: 1;
+  }
+  50%, 100% {
+    opacity: 0;
+  }
+}
+
+@keyframes secondHalf {
+  0%, 49.9% {
+    opacity: 0;
+  }
+  50%, 100% {
+    opacity: 1;
   }
 }
 

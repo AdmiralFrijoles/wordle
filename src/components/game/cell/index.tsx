@@ -33,17 +33,16 @@ export default function GameGridCell({value, status, position = 0, isRevealing, 
         return <Skeleton className={classnames("skeleton", sizeClasses)}/>;
     }
 
-    // Tiles are only 3D while turning. Resting 3D layers show stray seams on some GPUs.
+    // Tiles only take the layered flip markup while turning. Flat tiles at rest avoid stray seams.
     if (resultClass && isRevealing && isCompleted) {
         const style = {
             "--flip-delay": `${position * REVEAL_TIME_MS}ms`,
             "--tile-h": size === "small" ? "40px" : "var(--tile)",
         } as CSSProperties;
         return (
-            <div style={style} className={classnames("prevent-select tile-3d tile-swell font-bold", sizeClasses)}>
-                <div className="tile-inner is-flipped is-flipping">
-                    <div aria-hidden="true" className="tile-edge tile-edge-top"/>
-                    <div aria-hidden="true" className="tile-edge tile-edge-bottom"/>
+            <div style={style} className={classnames("prevent-select tile-swell font-bold", sizeClasses)}>
+                <div className="tile-inner">
+                    <div aria-hidden="true" className="tile-edge"/>
                     <div aria-hidden="true" className="tile-face tile-front tile-typed">
                         {value}
                         <span className="tile-shade"/>
