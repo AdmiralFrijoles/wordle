@@ -1,6 +1,7 @@
 ﻿import classnames from "classnames";
 import {Row} from "@/types";
 import GameGridCell from "@/components/game/cell";
+import type {CSSProperties} from "react";
 
 export type Celebration = "win" | "loss" | "loss-out" | null;
 
@@ -17,17 +18,18 @@ type Props = {
 
 export default function GameGrid({rows, isRevealing, currentRowIndex, currentRowClassName, isLoading, isPlaying, celebration, answer}: Props) {
     const isLossShown = (celebration === "loss" || celebration === "loss-out") && !!answer;
+    const gridSize = {"--rows": rows.length, "--cols": rows[0]?.length ?? 5} as CSSProperties;
 
     return (
-        <div className="relative flex grow flex-col items-center justify-center py-3 sm:py-0">
-            <div className={classnames("flex flex-col gap-1.5 sm:gap-2", {
+        <div style={gridSize} className="tile-grid relative flex grow flex-col items-center justify-center">
+            <div className={classnames("flex flex-col gap-[var(--tile-gap)]", {
                 "loss-sink": celebration === "loss",
                 "loss-restore": celebration === "loss-out",
             })}>
                 {rows.map((play, rowIndex) => {
                     const isCurrentRow = currentRowIndex === rowIndex;
                     const activeIndex = isCurrentRow && isPlaying ? play.findIndex(cell => !cell.value) : -1;
-                    const classes = `flex gap-1.5 sm:gap-2 ${isCurrentRow ? currentRowClassName : ""}`;
+                    const classes = `flex gap-[var(--tile-gap)] ${isCurrentRow ? currentRowClassName : ""}`;
                     return (
                         <div key={rowIndex} className={classes}>
                             {play.map((guess, idx) => (

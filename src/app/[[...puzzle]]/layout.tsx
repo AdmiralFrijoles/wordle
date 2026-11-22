@@ -246,7 +246,7 @@ export default async function RootLayout({children}: Readonly<{
             <Toaster position="top-center" containerStyle={{top: 72}}/>
             <div className="flex min-h-dvh flex-col">
                 <Header/>
-                <main className="mx-auto flex w-full max-w-[540px] grow flex-col px-4 pt-1 pb-[max(16px,env(safe-area-inset-bottom))] sm:pt-6 sm:pb-8">
+                <main className="mx-auto flex w-full max-w-[540px] grow flex-col px-4 pt-1 pb-[calc(max(16px,env(safe-area-inset-bottom))+8px)] sm:pt-6 sm:pb-8">
                     {children}
                 </main>
                 <Footer/>

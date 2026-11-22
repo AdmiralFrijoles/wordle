@@ -6,6 +6,7 @@
 @source '../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant short (@media (max-height: 719px));
 
 @theme inline {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
@@ -97,14 +98,6 @@
 
   --toast-bg: rgb(17 23 38 / 0.92);
   --toast-fg: #eef1f7;
-
-  --tile: clamp(34px, calc((100svh - 456px) / 6), 58px);
-}
-
-@media (min-width: 640px) {
-  :root {
-    --tile: clamp(44px, calc((100svh - 580px) / 6), 64px);
-  }
 }
 
 :root.dark {
@@ -241,6 +234,25 @@
   border-color: var(--hit-present-from);
   background: linear-gradient(180deg, var(--hit-present-from), var(--hit-present-to));
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), 0 6px 14px -8px rgb(var(--hit-present-rgb) / var(--hit-glow, var(--tile-glow)));
+}
+
+/* Needs --rows and --cols set inline. Tiles fill the box up to --tile-max, never below 34px unless the width forces it. */
+@utility tile-grid {
+  container-type: size;
+  --tile-gap: 6px;
+  --tile-pad: 12px;
+  --tile-max: 80px;
+  --tile-wb: calc((100cqw - (var(--cols) - 1) * var(--tile-gap)) / var(--cols));
+  --tile-hb: calc((100cqh - (var(--rows) - 1) * var(--tile-gap)) / var(--rows));
+  --tile: min(var(--tile-wb), max(34px, var(--tile-hb)), var(--tile-max));
+  padding-block: var(--tile-pad);
+  min-height: calc(var(--rows) * 34px + (var(--rows) - 1) * var(--tile-gap) + 2 * var(--tile-pad));
+
+  @media (min-width: 640px) {
+    --tile-gap: 8px;
+    --tile-pad: 0px;
+    --tile-max: 72px;
+  }
 }
 
 @utility tile-empty {
