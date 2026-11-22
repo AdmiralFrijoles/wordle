@@ -15,8 +15,8 @@ export default async function Header() {
 
     return (
         <header className="w-full shrink-0 sm:border-b sm:border-line">
-            <div className="mx-auto flex h-[60px] max-w-[1120px] items-center justify-between gap-4 pr-1.5 pl-[18px] sm:h-[68px] sm:px-6">
-                <Link className="prevent-select truncate text-[21px] font-extrabold tracking-[-0.02em] text-fg sm:text-[22px]"
+            <div className="mx-auto flex h-[60px] max-w-[1120px] items-center justify-between gap-4 pr-1.5 pl-[18px] sm:h-[68px] sm:px-6 short:h-12">
+                <Link className="prevent-select truncate text-[21px] font-extrabold tracking-[-0.02em] text-fg sm:text-[22px] short:text-[19px]"
                       href="/">
                     {headerTitle}
                 </Link>
